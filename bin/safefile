@@ -1,0 +1,3 @@
+#!/opt/local/bin/ruby -Ku
+require File.expand_path(File.join(File.dirname(__FILE__), "../lib/safefile_cli"))
+Safefile::CLI.execute(ARGV)
