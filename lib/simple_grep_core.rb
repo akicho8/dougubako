@@ -42,7 +42,12 @@ module SimpleGrep
     def run
       @target_files.each do |target_file|
         Pathname(target_file).find do |filename|
-          next if IgnoreChecker.ignore_file?(filename)
+          if IgnoreChecker.ignore_file?(filename)
+            if @options[:debug]
+              puts "skip: #{filename}"
+            end
+            next
+          end
           grep_execute(filename)
         end
       end
@@ -52,6 +57,9 @@ module SimpleGrep
     private
 
     def grep_execute(filename)
+      if @options[:debug]
+        puts "process: #{filename}"
+      end
       filename = filename.expand_path
       count = 0
       begin

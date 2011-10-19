@@ -10,6 +10,7 @@ module SimpleGrep
     def self.execute(args)
       options = {
         :no_comment_skip => false,
+        :debug => false,
       }
 
       oparser = OptionParser.new do |oparser|
@@ -24,6 +25,7 @@ module SimpleGrep
         oparser.on("-w", "--word-regexp", "単語とみなす") {|options[:word]|}
         oparser.on("-s", "検索文字列をエスケープ") {|options[:escape]|}
         oparser.on("-a", "#で始まる行をスキップしない"){|options[:no_comment_skip]|}
+        oparser.on("-d", "--debug" "デバッグモード", TrueClass){|options[:debug]|}
         oparser.on_tail("--help", "このヘルプを表示する") {puts oparser; exit(1)}
       end
 
