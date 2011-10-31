@@ -206,6 +206,12 @@ module Saferep
 
         % #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
 
+    例7. test-unit → rspec への簡易変換
+
+        % #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
+        % #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
+        % #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
+
 EOT
       end
 
