@@ -1,4 +1,3 @@
-#!/opt/local/bin/ruby -Ku
 # -*- coding: utf-8 -*-
 # 文字列検索ツール
 

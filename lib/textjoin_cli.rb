@@ -1,5 +1,4 @@
-#!/opt/local/bin/ruby -Ku
-
+# -*- coding: utf-8 -*-
 require "optparse"
 require File.expand_path(File.join(File.dirname(__FILE__), "textjoin_core"))
 

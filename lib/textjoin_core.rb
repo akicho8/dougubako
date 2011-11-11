@@ -1,5 +1,4 @@
-#!/opt/local/bin/ruby -Ku
-
+# -*- coding: utf-8 -*-
 require "pathname"
 require "stringio"
 require "fileutils"

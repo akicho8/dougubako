@@ -1,4 +1,3 @@
-#!/opt/local/bin/ruby -Ku
 # -*- coding: utf-8 -*-
 # -*- compile-command: "ruby -Ku test_saferep.rb -v" -*-
 # テキストファイル置換ツール

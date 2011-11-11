@@ -1,4 +1,3 @@
-#!/opt/local/bin/ruby -Ku
 # -*- coding: utf-8; compile-command: "./saferenum_cli.rb ~/Pictures/日常" -*-
 # ファイルを連番にリネームするスクリプト
 

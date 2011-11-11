@@ -1,4 +1,3 @@
-#!/opt/local/bin/ruby -Ku
 # -*- coding: utf-8 -*-
 # ファイル and ディレクトリ名置換ツール
 
