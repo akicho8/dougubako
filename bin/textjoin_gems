@@ -1,4 +1,5 @@
 #!/opt/local/bin/ruby -Ku
+# -*- coding: utf-8 -*-
 
 require "pathname"
 require "yaml"
@@ -10,7 +11,11 @@ module TextJoin
       outputdir = Pathname("/var/textjoin").expand_path
       versions = {}
       all_gems = []
-      gem_path = "/opt/local/lib/ruby/gems/1.8"
+      if false
+        gem_path = "/opt/local/lib/ruby/gems/1.8"
+      else
+        gem_path = `rvm gemdir`.strip
+      end
       Pathname.glob("#{gem_path}/gems/*").each{|path|
         all_gems << path
         if name = path.to_s.slice(/[\w\-]+(?=-\d+\..+\z)/)
