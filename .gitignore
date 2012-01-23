@@ -2,3 +2,6 @@
 /bin/textjoin_user
 /misc
 /doc/*.txt
+/lib/_*
+/lib/log
+
