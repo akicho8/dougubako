@@ -68,7 +68,7 @@ module SimpleGrep
         STDERR.puts "警告: #{error}"
       else
         css_flag = filename.extname.match(/\.(css|scss)\z/)
-        buffer.toutf8.each_with_index do |line, index|
+        buffer.toutf8.lines.each_with_index do |line, index|
           if !css_flag && !@options[:no_comment_skip]
             if line.match(/^\s*#/)
               next

@@ -14,14 +14,14 @@ module TextJoin
       oparser = OptionParser.new do |oparser|
         oparser.version = "2.0.0"
         oparser.banner = [
-          "テキストファイル連結ツール #{oparser.ver}",
-          "使い方: #{oparser.program_name} [オプション] ディレクトリ or ファイル...",
-        ].collect{|e|e + "\n"}
+          "テキストファイル連結ツール #{oparser.ver}\n\n",
+          "使い方: #{oparser.program_name} [オプション] ディレクトリ or ファイル...\n\n",
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-o", "--output=filename", "出力ファイル"){|params[:output]|}
-        oparser.on("-s", "--limisize=limitsize", "指定KB以上のファイルは連結しない(初期値#{params[:limitsize]})"){|params[:limitsize]|}
-        oparser.on("-m", "--filemask=filemask", "指定ファイルのみを連結(初期値/#{params[:filemask]}/)"){|params[:filemask]|}
+        oparser.on("-o", "--output=filename", "出力ファイル"){|v|params[:output] = v}
+        oparser.on("-s", "--limisize=limitsize", "指定KB以上のファイルは連結しない(初期値#{params[:limitsize]})"){|v|params[:limitsize] = v}
+        oparser.on("-m", "--filemask=filemask", "指定ファイルのみを連結(初期値/#{params[:filemask]}/)"){|v|params[:filemask] = v}
         oparser.on_tail("--help", "このヘルプを表示する") {print oparser; exit}
         oparser.on_tail(<<-END)
 

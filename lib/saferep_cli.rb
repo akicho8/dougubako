@@ -92,7 +92,7 @@ module Saferep
           guess = NKF::UTF8
         end
       end
-      content.each_with_index{|line, index|
+      content.lines.each_with_index{|line, index|
         new_line = line.clone
         do_gsub = true
         if @options[:head] && index.next > @options[:head]
@@ -125,7 +125,7 @@ module Saferep
           bak = backupfile(fname)
           fname.rename(bak)
           if bak.exist?
-            out = Kconv.kconv(out.to_s, guess, NKF::UTF8)
+            out = Kconv.kconv(out.join, guess, NKF::UTF8)
             fname.open("w"){|f|f << out}
             # 権限復旧
             fname.chmod(bak.stat.mode)
@@ -164,18 +164,18 @@ module Saferep
         oparser.banner = [
           "テキストファイル置換スクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] 置換元 置換後 ファイル...\n\n"
-        ]
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-x", "--exec", "本当に置換する") {|options[:exec]|}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|options[:ignocase]|}
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|options[:word]|}
-        oparser.on("-s", "--simple-string=[1|2]", "置換文字列をエスケープ。片方のみの指定も可能(1:置換元 2:置換後)") {|options[:simple_text]|}
-        oparser.on("-d", "--debug", "デバッグ") {|options[:debug]|}
-        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(デフォルトはすべてUTF-8とみなす)") {|options[:guess]|}
-        oparser.on("--sjis", "文字コードをすべてsjisとする") {|options[:sjis]|}
-        oparser.on("--head=N", "先頭のn行のみが対象", Integer) {|options[:head]|}
-        oparser.on("--limit=N", "N個置換したら打ち切る", Integer) {|options[:limit]|}
+        oparser.on("-x", "--exec", "本当に置換する") {|v|options[:exec] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
+        oparser.on("-s", "--simple-string=[1|2]", "置換文字列をエスケープ。片方のみの指定も可能(1:置換元 2:置換後)") {|v|options[:simple_text] = v}
+        oparser.on("-d", "--debug", "デバッグ") {|v|options[:debug] = v}
+        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(デフォルトはすべてUTF-8とみなす)") {|v|options[:guess] = v}
+        oparser.on("--sjis", "文字コードをすべてsjisとする") {|v|options[:sjis] = v}
+        oparser.on("--head=N", "先頭のn行のみが対象", Integer) {|v|options[:head] = v}
+        oparser.on("--limit=N", "N個置換したら打ち切る", Integer) {|v|options[:limit] = v}
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
         oparser.on
         oparser.on(<<-EOT)

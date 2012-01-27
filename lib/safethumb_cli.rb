@@ -139,19 +139,19 @@ module Safethumb
         oparser.banner = [
           "サムネイル生成スクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] files...\n\n",
-        ]
+        ].join
         oparser.on_head("オプション:")
         oparser.on
-        oparser.on("-m", "--mode=MODE", "モード(random|div|step)(default: #{config[:mode]})", String){|config[:mode]|}
-        oparser.on("-o", "--outdir=DIR", "出力ディレクトリ(default: #{config[:outdir]})", String){|config[:outdir]|}
-        oparser.on("-p", "--prefix=PREFIX", "プレフィクス(default: #{config[:prefix]})", String){|config[:prefix]|}
-        oparser.on("-c", "--count=COUNT", "生成数(default: #{config[:count]})", Integer){|config[:count]|}
-        oparser.on("--ext=EXTNAME", "拡張子(default: #{config[:extname]})", String){|config[:extname]|}
-        oparser.on("--convert=ARGS", "ffmpeg引数(default: #{config[:convert]})", String){|config[:convert]|}
-        oparser.on("-x", "--[no-]exec", "本当に実行する(default: #{config[:exec]})", TrueClass){|config[:exec]|}
-        oparser.on("--open", "実行後の確認(default: #{config[:open]})", TrueClass){|config[:open]|}
-        oparser.on("--step=STEP", "stepモードで分割するときのステップ(default: #{config[:step]})", Float){|config[:step]|}
-        oparser.on("--clean", "出力ディレクトリを削除するか", TrueClass){|config[:clean]|}
+        oparser.on("-m", "--mode=MODE", "モード(random|div|step)(default: #{config[:mode]})", String){|v|config[:mode] = v}
+        oparser.on("-o", "--outdir=DIR", "出力ディレクトリ(default: #{config[:outdir]})", String){|v|config[:outdir] = v}
+        oparser.on("-p", "--prefix=PREFIX", "プレフィクス(default: #{config[:prefix]})", String){|v|config[:prefix] = v}
+        oparser.on("-c", "--count=COUNT", "生成数(default: #{config[:count]})", Integer){|v|config[:count] = v}
+        oparser.on("--ext=EXTNAME", "拡張子(default: #{config[:extname]})", String){|v|config[:extname] = v}
+        oparser.on("--convert=ARGS", "ffmpeg引数(default: #{config[:convert]})", String){|v|config[:convert] = v}
+        oparser.on("-x", "--[no-]exec", "本当に実行する(default: #{config[:exec]})", TrueClass){|v|config[:exec] = v}
+        oparser.on("--open", "実行後の確認(default: #{config[:open]})", TrueClass){|v|config[:open] = v}
+        oparser.on("--step=STEP", "stepモードで分割するときのステップ(default: #{config[:step]})", Float){|v|config[:step] = v}
+        oparser.on("--clean", "出力ディレクトリを削除するか", TrueClass){|v|config[:clean] = v}
         oparser.on(<<-EOT)
 
 サンプル:

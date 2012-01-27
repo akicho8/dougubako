@@ -17,14 +17,14 @@ module SimpleGrep
         oparser.banner = [
           "文字列検索スクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] 検索元 ファイル...\n\n",
-        ]
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|options[:ignocase]|}
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|options[:word]|}
-        oparser.on("-s", "検索文字列をエスケープ") {|options[:escape]|}
-        oparser.on("-a", "#で始まる行をスキップしない"){|options[:no_comment_skip]|}
-        oparser.on("-d", "--debug" "デバッグモード", TrueClass){|options[:debug]|}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
+        oparser.on("-s", "検索文字列をエスケープ") {|v|options[:escape] = v}
+        oparser.on("-a", "#で始まる行をスキップしない"){|v|options[:no_comment_skip] = v}
+        oparser.on("-d", "--debug" "デバッグモード", TrueClass){|v|options[:debug] = v}
         oparser.on_tail("--help", "このヘルプを表示する") {puts oparser; exit(1)}
       end
 

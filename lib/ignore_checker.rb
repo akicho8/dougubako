@@ -29,21 +29,21 @@ module IgnoreChecker
     # RCSLOG RCS SCCS CVS* tags TAGS .make.state .nse_depinfo cvslog.*  *~
     # #* .#* ,* *.old *.bak *.orig *.rej .del-* *.a *.o *.Z *.elc *.ln
     # %%〜%%はSmartyのキャッシュ
-    if /\b(RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo)\b/.match(filepath) ||
+    if /\b(RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo)\b/.match(filepath.to_s) ||
         filepath.expand_path.to_s.include?("/tmp/sessions/ruby_sess.") ||
         filepath.expand_path.to_s.match(/\b(cache|password_dic|coverage|public\/assets)\b/) ||
-        /(CVS.*|cvslog\.*)/.match(filepath) ||
-        /\.(svn|git)\b/.match(filepath) ||
-        /~\z/.match(filepath.basename) ||
-        /^.?#/.match(filepath.basename) ||
-        /^%%.*%%/.match(filepath.basename) ||
-        /\.(cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|\.del-.*)\z/.match(filepath) ||
-        /\.log(\.|\z)/.match(filepath) ||
-        /\.min\.(js|css)\z/.match(filepath) ||
-        %r!\bdoc/app\b!.match(filepath) || # rails RAILS_ROOT/doc/app
-        %r!\btmp/coverage\b!.match(filepath) || # rails RAILS_ROOT/tmp/coverage
-        %r!\bpkg\b!.match(filepath) || # rails RAILS_ROOT/pkg
-        /\.(fla|flv|avi||ttf|mp3|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xls|ppt|ico|pid|tmp)\z/.match(filepath)
+        /(CVS.*|cvslog\.*)/.match(filepath.to_s) ||
+        /\.(svn|git)\b/.match(filepath.to_s) ||
+        /~\z/.match(filepath.basename.to_s) ||
+        /^.?#/.match(filepath.basename.to_s) ||
+        /^%%.*%%/.match(filepath.basename.to_s) ||
+        /\.(cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|\.del-.*)\z/.match(filepath.to_s) ||
+        /\.log(\.|\z)/.match(filepath.to_s) ||
+        /\.min\.(js|css)\z/.match(filepath.to_s) ||
+        %r!\bdoc/app\b!.match(filepath.to_s) || # rails RAILS_ROOT/doc/app
+        %r!\btmp/coverage\b!.match(filepath.to_s) || # rails RAILS_ROOT/tmp/coverage
+        %r!\bpkg\b!.match(filepath.to_s) || # rails RAILS_ROOT/pkg
+        /\.(fla|flv|avi||ttf|mp3|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xls|ppt|ico|pid|tmp)\z/.match(filepath.to_s)
       return true
     end
 

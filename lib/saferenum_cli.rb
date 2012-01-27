@@ -123,13 +123,13 @@ module Saferenum
         oparser.banner = [
           "ファイルを連番にリネームするスクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] [オプション] 対象ディレクトリ...\n\n",
-        ]
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-x", "--exec", "実際に実行する") {|options[:exec]|}
-        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|options[:recursive]|}
-        oparser.on("-f", "--format=STRING", "フォーマット(デフォルト:#{options[:format].dump})") {|options[:format]|}
-        oparser.on("-p", "--prefix=STRING", "接頭語(デフォルト:#{options[:prefix].dump})") {|options[:prefix]|}
+        oparser.on("-x", "--exec", "実際に実行する") {|v|options[:exec] = v}
+        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v|options[:recursive] = v}
+        oparser.on("-f", "--format=STRING", "フォーマット(デフォルト:#{options[:format].dump})") {|v|options[:format] = v}
+        oparser.on("-p", "--prefix=STRING", "接頭語(デフォルト:#{options[:prefix].dump})") {|v|options[:prefix] = v}
         oparser.on_tail("-h", "--help", "このヘルプを表示する") {print opts; exit}
       end
 

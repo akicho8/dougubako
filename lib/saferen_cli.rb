@@ -121,14 +121,14 @@ module Saferen
         oparser.banner = [
           "ファイル・デイレクトリ名置換スクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] 置換元 置換後 ファイル...\n\n",
-        ]
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-x", "--exec", "実際に置換する"){|options[:exec]|}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|options[:ignocase]|}
-        oparser.on("-w", "--word-regexp", "単語とみなす"){|options[:word]|}
-        oparser.on("--svn", "svn mv コマンドでリネーム"){|options[:svn_mv]|}
-        oparser.on("--git", "git mv コマンドでリネーム"){|options[:git_mv]|}
+        oparser.on("-x", "--exec", "実際に置換する"){|v|options[:exec] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす"){|v|options[:word] = v}
+        oparser.on("--svn", "svn mv コマンドでリネーム"){|v|options[:svn_mv] = v}
+        oparser.on("--git", "git mv コマンドでリネーム"){|v|options[:git_mv] = v}
       end
 
       begin

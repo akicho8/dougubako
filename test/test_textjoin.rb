@@ -15,20 +15,20 @@ class TestRCat < Test::Unit::TestCase
   end
 
   def test_help
-    assert_equal(1, `../bin/textjoin --help`.grep(/--filemask/).size)
+    assert_equal(1, `../bin/textjoin --help`.lines.grep(/--filemask/).size)
   end
 
   def test_normal
-    assert_equal(1, `../bin/textjoin testdir`.grep(/__html__/).size)
+    assert_equal(1, `../bin/textjoin testdir`.lines.grep(/__html__/).size)
   end
 
   def test_mask
-    assert_equal(0, `../bin/textjoin -m "\\.java\\z" testdir`.grep(/__html__/).size)
-    assert_equal(1, `../bin/textjoin -m "\\.java\\z" testdir`.grep(/__java__/).size)
+    assert_equal(0, `../bin/textjoin -m "\\.java\\z" testdir`.lines.grep(/__html__/).size)
+    assert_equal(1, `../bin/textjoin -m "\\.java\\z" testdir`.lines.grep(/__java__/).size)
   end
 
   def test_size
-    assert_equal(1, `../bin/textjoin -s 1 testdir`.grep(/OOOO/).size)
-    assert_equal(0, `../bin/textjoin -s 1 testdir`.grep(/NNNN/).size)
+    assert_equal(1, `../bin/textjoin -s 1 testdir`.lines.grep(/OOOO/).size)
+    assert_equal(0, `../bin/textjoin -s 1 testdir`.lines.grep(/NNNN/).size)
   end
 end

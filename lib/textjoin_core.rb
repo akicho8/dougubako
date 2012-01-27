@@ -131,7 +131,7 @@ module TextJoin
         o.puts "-" * 80
         o.puts "* #{sub_header(i, filename)}"
         o.puts "-" * 80
-        NKF::nkf("--unix", filename.read).each{|line|
+        NKF::nkf("--unix", filename.read).lines.each{|line|
           o.puts line.toutf8.rstrip
         }
       }

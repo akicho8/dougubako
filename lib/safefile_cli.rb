@@ -123,16 +123,16 @@ module Safefile
         oparser.banner = [
           "改行統一 #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] ディレクトリ or ファイル...\n\n",
-        ]
+        ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-x", "--exec", "本当に置換する"){|options[:exec]|}
-        oparser.on("-f", "--force", "強制置換する"){|options[:force]|}
-        oparser.on("-s", "--sjis", "sjisにする。改行もWindows用の CR LF にする"){|options[:sjis]|}
-        oparser.on("-r", "--raw", "rstripとかしない"){|options[:raw]|}
-        oparser.on("-z", "--hankaku", "全角アルファベットや全角数値や丸かっこを半角にする"){|options[:to_hankaku]|}
-        oparser.on("-p", "--hankaku-space", "全角スペースを半角スペースにする"){|options[:hankaku_space]|}
-        oparser.on("-d", "--[no]-diff", "diffの表示"){|options[:diff]|}
+        oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
+        oparser.on("-f", "--force", "強制置換する"){|v|options[:force] = v}
+        oparser.on("-s", "--sjis", "sjisにする。改行もWindows用の CR LF にする"){|v|options[:sjis] = v}
+        oparser.on("-r", "--raw", "rstripとかしない"){|v|options[:raw] = v}
+        oparser.on("-z", "--hankaku", "全角アルファベットや全角数値や丸かっこを半角にする"){|v|options[:to_hankaku] = v}
+        oparser.on("-p", "--hankaku-space", "全角スペースを半角スペースにする"){|v|options[:hankaku_space] = v}
+        oparser.on("-d", "--[no]-diff", "diffの表示"){|v|options[:diff] = v}
       end
 
       begin
