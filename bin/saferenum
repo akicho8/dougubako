@@ -1,3 +1,4 @@
 #!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
 require_relative '../lib/saferenum_cli'
 Saferenum::CLI.execute(ARGV)

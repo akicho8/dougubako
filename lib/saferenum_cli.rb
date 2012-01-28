@@ -35,9 +35,10 @@ module Saferenum
 
     def run_dir(dir)
       dir = Pathname(dir).expand_path
-      all_files = target_file_and_dir(dir)                 # すべてのファイルとディレクトリ
-      files = all_files.find_all{|entry|!entry.directory?} # ファイルのみ
-      dirs = all_files.find_all{|entry|entry.directory?}   # ディレクトリのみ
+      all = dir.each_child                                       # すべてのファイルとディレクトリ
+      all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)}.sort # . .. .git _ などで始まるものを消して必要なものだけに絞る
+      files = all.find_all{|entry|!entry.directory?}             # ファイルのみ
+      dirs = all.find_all{|entry|entry.directory?}               # ディレクトリのみ
 
       # サブディレクトリを処理
       if @options[:recursive]
@@ -64,7 +65,7 @@ module Saferenum
     #
     def run_core(dir, files)
       if @options[:exec]
-        tmpdir = dir + SecureRandom.hex
+        tmpdir = Pathname("#{dir}/#{SecureRandom.hex}")
         FileUtils.mkdir(tmpdir, :noop => @options[:noop], :verbose => @options[:verbose])
       end
 
@@ -101,11 +102,6 @@ module Saferenum
     end
 
     def target_file_and_dir(dir)
-      # . .. .git _ などで始まるものを消して必要なものだけに絞る
-      files = dir.entries.reject{|entry|entry.to_s.match(/\A[\._]/)}.sort
-
-      # そのままだと directory? が使えなかったりと扱いにくいので絶対パスにする
-      files = files.collect{|entry|dir + entry}
     end
   end
 
@@ -120,7 +116,7 @@ module Saferenum
         :base        => 100,    # インデックスの最初
         :step        => 10,     # インデックスのステップ
         # CLで指定できないもの
-        :noop        => true,  # デバッグ時は true にする
+        :noop        => $DEBUG, # デバッグ時は true にする
       }
 
       oparser = OptionParser.new do |oparser|
@@ -163,3 +159,4 @@ if $0 == __FILE__
   Saferenum::CLI.execute(["#{Pathname(__FILE__).dirname}/_pictures"])
   Saferenum::CLI.execute(["-r", "#{Pathname(__FILE__).dirname}/_pictures"])
 end
+
