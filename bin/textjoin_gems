@@ -3,7 +3,7 @@
 
 require "pathname"
 require "yaml"
-require File.expand_path(File.join(File.dirname(__FILE__), "../lib/textjoin_core"))
+require_relative '../lib/textjoin_core'
 
 module TextJoin
   module Gems

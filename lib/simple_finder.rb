@@ -4,7 +4,7 @@
 #
 
 require "pathname"
-require File.expand_path(File.join(File.dirname(__FILE__), "ignore_checker"))
+require_relative 'ignore_checker'
 require "fileutils"
 require "optparse"
 

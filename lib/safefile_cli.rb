@@ -6,7 +6,7 @@ require "optparse"
 require "jcode"
 require "diff/lcs"
 
-require File.expand_path(File.join(File.dirname(__FILE__), "ignore_checker"))
+require_relative 'ignore_checker'
 
 module Safefile
   class Core

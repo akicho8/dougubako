@@ -2,7 +2,7 @@
 # 文字列検索ツール
 
 require "optparse"
-require File.expand_path(File.join(File.dirname(__FILE__), "simple_grep_core"))
+require_relative 'simple_grep_core'
 
 module SimpleGrep
   module CLI

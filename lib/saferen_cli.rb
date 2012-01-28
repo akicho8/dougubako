@@ -2,7 +2,7 @@
 # ファイル and ディレクトリ名置換ツール
 
 require "optparse"
-require File.expand_path(File.join(File.dirname(__FILE__), "ignore_checker"))
+require_relative 'ignore_checker'
 
 module Saferen
   class Core

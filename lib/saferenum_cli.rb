@@ -1,8 +1,12 @@
-# -*- coding: utf-8; compile-command: "./saferenum_cli.rb ~/Pictures/日常" -*-
+# -*- coding: utf-8 -*-
+#
 # ファイルを連番にリネームするスクリプト
+#
 
-require "optparse"
-require File.expand_path(File.join(File.dirname(__FILE__), "ignore_checker"))
+require 'optparse'
+require 'securerandom'
+require 'fileutils'
+require_relative 'ignore_checker'
 
 module Saferenum
   class Core
@@ -13,113 +17,114 @@ module Saferenum
     def initialize(target_dirs, options)
       @target_dirs = target_dirs
       @options = options
-      @log = []
     end
 
     def run
       @target_dirs.each{|target_dir|
-        run_directory(target_dir)
+        run_dir(target_dir)
       }
-      result_display
+      puts
+      if @options[:exec]
+        puts "実行完了"
+      else
+        puts "本当に実行するには -x オプションを付けてください"
+      end
     end
 
-    def run_directory(directory)
-      # まずは . で始まるのを消して必要なものだけに絞る
-      entries = directory.entries.reject{|entry|entry.to_s.match(/\A\./)}.sort
+    private
+
+    def run_dir(dir)
+      dir = Pathname(dir).expand_path
+      all_files = target_file_and_dir(dir)                 # すべてのファイルとディレクトリ
+      files = all_files.find_all{|entry|!entry.directory?} # ファイルのみ
+      dirs = all_files.find_all{|entry|entry.directory?}   # ディレクトリのみ
+
+      # サブディレクトリを処理
+      if @options[:recursive]
+        dirs.each{|e|run_dir(e)}
+      end
+
+      if @options[:all]
+      else
+        # 更新する場合はすでに数値がついたものだけを対象にする
+        files = files.find_all{|e|e.basename.to_s.match(/\A\d+/)}
+      end
+
+      if files.size.zero?
+        return
+      else
+        puts "[DIR] #{dir} (#{files.size} files)"
+      end
+
+      run_core(dir, files)
+    end
+
+    #
+    # dir で files を処理する
+    #
+    def run_core(dir, files)
+      if @options[:exec]
+        tmpdir = dir + SecureRandom.hex
+        FileUtils.mkdir(tmpdir, :noop => @options[:noop], :verbose => @options[:verbose])
+      end
+
+      if @options[:exec]
+        FileUtils.mv(files, tmpdir, :noop => @options[:noop], :verbose => @options[:verbose])
+      end
+
+      files.each_with_index{|file, index|
+        if @options[:number_only]
+          rest = file.extname
+        else
+          md = file.basename.to_s.match(/\A(\d*)(?<rest>.*)/) or raise "ファイル名が 0123_foo.txt 形式じゃない"
+          rest = md[:rest]
+        end
+        renamed_file = file.dirname + [number_format(files, index), rest].join
+        puts "      [#{index.next}/#{files.size}]  #{file.basename} => #{renamed_file.basename}"
+        if @options[:exec]
+          FileUtils.mv(tmpdir + file.basename, renamed_file, :noop => @options[:noop], :verbose => @options[:verbose])
+        end
+      }
+
+      if @options[:exec]
+        FileUtils.rmdir(tmpdir, :noop => @options[:noop], :verbose => @options[:verbose])
+      end
+    end
+
+    #
+    # ファイル名のプレフィクス
+    #
+    def number_format(files, index)
+      width = (@options[:base] + files.size * @options[:step]).to_s.size
+      i = @options[:base] + index * @options[:step]
+      "%0*d" % [width + 1, i]
+    end
+
+    def target_file_and_dir(dir)
+      # . .. .git _ などで始まるものを消して必要なものだけに絞る
+      files = dir.entries.reject{|entry|entry.to_s.match(/\A[\._]/)}.sort
 
       # そのままだと directory? が使えなかったりと扱いにくいので絶対パスにする
-      entries = entries.collect{|entry|directory + entry}
-
-      # カレントのファイルたち
-      target_files = entries.find_all{|entry|!entry.directory?}
-
-      # サブディレクトリ
-      sub_dirs = entries.find_all{|entry|entry.directory? && !entry.basename.to_s.match(/\A(cvs|rcs)\z/i)}
-
-      # サブディレクトリを先に処理する
-      sub_dirs.each{|sub_dir|
-        run_directory(sub_dir)
-      }
-
-      # 元のファイル名と被らないように元のファイル名を集める
-      ignore_names = target_files.collect{|target_file|target_file.basename(".*").to_s}
-
-      # 変更後のファイル名の生成、既存のものと、生成後のものと、被らないようにする
-      rename_infos = target_files.enum_with_index.collect{|target_file, index|
-        basename = nil
-        loop {
-          index = index.next
-          basename = "#{@options[:prefix]}#{@options[:format]}" % index
-          unless ignore_names.include?(basename)
-            ignore_names << basename # 重要
-            break
-          end
-        }
-        filename = target_file.dirname + "#{basename}#{target_file.extname.downcase}"
-        {:target_file => target_file, :new_filename => filename}
-      }
-
-      # 変換後とファイル名が同じなら省く
-      rename_infos = rename_infos.reject{|rename_info|
-        resut = (rename_info[:target_file].basename == rename_info[:new_filename].basename)
-        if resut
-          puts "skip: #{rename_info[:target_file]}"
-        end
-        resut
-      }
-
-      # 変換後のファイルがあれば止める
-      if false
-        rename_infos.each{|rename_info|
-          if rename_info[:new_filename].exist?
-            puts "ファイルがすでに存在しています : #{rename_info[:target_file]} => #{rename_info[:new_filename]}"
-            exit 1
-          end
-        }
-      end
-
-      # 変換
-      rename_infos.each{|rename_info|
-        result = ""
-        begin
-          ret = 0
-          if rename_info[:new_filename].exist?
-            puts "すでにあるのでリネーム直前でスキップ: #{rename_info[:target_file]} => #{rename_info[:new_filename]}"
-          else
-            if @options[:exec]
-              ret = rename_info[:target_file].rename(rename_info[:new_filename])
-            end
-          end
-          if ret == 0
-            result = "ok"
-          else
-            result = "error"
-          end
-        rescue => error
-          result = error.message
-        end
-        puts "#{rename_info[:target_file]}:【#{rename_info[:new_filename].basename('.*')}】 #{result}".strip
-      }
-    end
-
-    def result_display
-      unless @log.empty?
-        puts @log.join("\n")
-      end
-      puts "\n本当に実行するには -x オプションを付けてください。" unless @options[:exec]
+      files = files.collect{|entry|dir + entry}
     end
   end
 
   module CLI
     def self.execute(args)
       options = {
-        :prefix => "",
-        :format => "%04d",
-        :recursive => false,
+        # CLで指定できるもの
+        :all         => false,  # true:全ファイルを処理する false:数字のついたものだけが対象
+        :recursive   => false,  # サブディレクトリも対象にする
+        :verbose     => false,  # 詳細表示
+        :number_only => false,  # true:数字以外を消す false:数字以外を保持する
+        :base        => 100,    # インデックスの最初
+        :step        => 10,     # インデックスのステップ
+        # CLで指定できないもの
+        :noop        => true,  # デバッグ時は true にする
       }
 
       oparser = OptionParser.new do |oparser|
-        oparser.version = "1.0.0"
+        oparser.version = "2.0.0"
         oparser.banner = [
           "ファイルを連番にリネームするスクリプト #{oparser.ver}\n\n",
           "使い方: #{oparser.program_name} [オプション] [オプション] 対象ディレクトリ...\n\n",
@@ -128,36 +133,33 @@ module Saferenum
         oparser.on
         oparser.on("-x", "--exec", "実際に実行する") {|v|options[:exec] = v}
         oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v|options[:recursive] = v}
-        oparser.on("-f", "--format=STRING", "フォーマット(デフォルト:#{options[:format].dump})") {|v|options[:format] = v}
-        oparser.on("-p", "--prefix=STRING", "接頭語(デフォルト:#{options[:prefix].dump})") {|v|options[:prefix] = v}
-        oparser.on_tail("-h", "--help", "このヘルプを表示する") {print opts; exit}
+        oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})") {|v|options[:all] = v}
+        oparser.on("-n", "--number-only", "番号だけにする？(デフォルト:#{options[:number_only]})") {|v|options[:number_only] = v}
+        oparser.on("--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer) {|v|options[:base] = v}
+        oparser.on("--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer) {|v|options[:step] = v}
+        oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})") {|v|options[:verbose] = v}
+        oparser.on_tail("-h", "--help", "このヘルプを表示する") {puts oparser; abort}
       end
 
       begin
-        oparser.parse!(args)
+        args = oparser.parse(args)
       rescue OptionParser::InvalidOption
         puts "オプションが間違っています。"
         abort
       end
 
-      def usage
-        print ARGV.options
-        exit
+      if args.empty?
+        puts oparser
+        abort
       end
 
-      if ARGV.empty?
-        print ARGV.options
-        exit
-      end
-
-      # ARGV << "." if ARGV.empty?
-
-      target_dirs = ARGV.collect{|target_pathname|Pathname.new(target_pathname).expand_path}
-      Saferenum::Core.run(target_dirs, options)
+      Saferenum::Core.run(args, options)
     end
   end
 end
 
 if $0 == __FILE__
-  Saferenum::CLI.execute(ARGV)
+  Saferenum::CLI.execute(["--all", "--number-only", "~/Pictures/がさいゆの"])
+  Saferenum::CLI.execute(["#{Pathname(__FILE__).dirname}/_pictures"])
+  Saferenum::CLI.execute(["-r", "#{Pathname(__FILE__).dirname}/_pictures"])
 end

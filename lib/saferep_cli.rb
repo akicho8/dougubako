@@ -4,7 +4,7 @@
 
 require "optparse"
 require "timeout"
-require File.expand_path(File.join(File.dirname(__FILE__), "ignore_checker"))
+require_relative 'ignore_checker'
 
 module Saferep
   class Core
@@ -210,6 +210,10 @@ module Saferep
         % #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
         % #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
         % #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
+
+    例8. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
+
+        % #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
 
 EOT
       end
