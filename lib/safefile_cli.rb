@@ -6,7 +6,7 @@ require "optparse"
 require "jcode"
 require "diff/lcs"
 
-require_relative 'ignore_checker'
+require_relative 'file_filter'
 
 module Safefile
   class Core
@@ -27,7 +27,7 @@ module Safefile
     def run
       @files.each do |filepath|
         Pathname(filepath).find do |filename|
-          if IgnoreChecker.ignore_file?(filename)
+          if FileFilter.ignore_file?(filename)
             next
           end
           if filename.basename.to_s.match(/(\.min\.|\.(js|css)\z)/)

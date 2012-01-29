@@ -4,9 +4,11 @@
 
 require "optparse"
 require "timeout"
-require_relative 'ignore_checker'
+require_relative 'file_filter'
 
 module Saferep
+  VERSION = "2.0.2"
+
   class Core
     def self.run(*args)
       new(*args).run
@@ -52,7 +54,7 @@ module Saferep
             result = true
             begin
               timeout(1.0) {
-                result = IgnoreChecker.ignore_file?(fname)
+                result = FileFilter.ignore_file?(fname)
               }
             rescue Timeout::Error
               puts "#{fname} の読み込みに時間がかかりすぎです。"
@@ -160,26 +162,24 @@ module Saferep
     def self.execute(args)
       options = {}
       oparser = OptionParser.new do |oparser|
-        oparser.version = "2.0.1"
+        oparser.version = VERSION
         oparser.banner = [
-          "テキストファイル置換スクリプト #{oparser.ver}\n\n",
-          "使い方: #{oparser.program_name} [オプション] 置換元 置換後 ファイル...\n\n"
+          "テキストファイル置換スクリプト #{oparser.ver}\n",
+          "使い方: #{oparser.program_name} [オプション] <置換前> <置換後> <ファイル or ディレクトリ>...\n"
         ].join
-        oparser.on_head("オプション")
-        oparser.on
-        oparser.on("-x", "--exec", "本当に置換する") {|v|options[:exec] = v}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
-        oparser.on("-s", "--simple-string=[1|2]", "置換文字列をエスケープ。片方のみの指定も可能(1:置換元 2:置換後)") {|v|options[:simple_text] = v}
-        oparser.on("-d", "--debug", "デバッグ") {|v|options[:debug] = v}
-        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(デフォルトはすべてUTF-8とみなす)") {|v|options[:guess] = v}
-        oparser.on("--sjis", "文字コードをすべてsjisとする") {|v|options[:sjis] = v}
-        oparser.on("--head=N", "先頭のn行のみが対象", Integer) {|v|options[:head] = v}
-        oparser.on("--limit=N", "N個置換したら打ち切る", Integer) {|v|options[:limit] = v}
-        oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
-        oparser.on
+        oparser.on("オプション:")
+        oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす"){|v|options[:word] = v}
+        oparser.on("-s", "--simple-string=[1|2]", "置換文字列をエスケープ。片方のみの指定も可能(1:置換前 2:置換後)"){|v|options[:simple_text] = v}
+        oparser.on("-d", "--debug", "デバッグ"){|v|options[:debug] = v}
+        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(デフォルトはすべてUTF-8とみなす)"){|v|options[:guess] = v}
+        oparser.on("--sjis", "文字コードをすべてsjisとする"){|v|options[:sjis] = v}
+        oparser.on("--head=N", "先頭のn行のみが対象", Integer){|v|options[:head] = v}
+        oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
+        oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
-サンプル
+サンプル:
 
     例1. foo という文字列を bar に置換するには？ (カレント以下のテキストファイルが対象)
 
@@ -219,15 +219,17 @@ EOT
       end
 
       begin
-        oparser.parse!(args)
+        args = oparser.parse(args)
       rescue OptionParser::InvalidOption
-        puts "オプションが間違っています。"; exit
+        puts "オプションが間違っています。"
+        abort
       end
 
       src = args.shift
       dst = args.shift
       if src.nil? || dst.nil?
-        puts oparser
+        puts "使い方: #{oparser.program_name} [オプション] <置換前> <置換後> <ファイル or ディレクトリ>..."
+        puts "`#{oparser.program_name} --help' でより詳しい情報を表示します。"
         abort
       end
 

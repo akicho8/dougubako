@@ -4,7 +4,7 @@
 #
 
 require "pathname"
-require_relative 'ignore_checker'
+require_relative 'file_filter'
 require "fileutils"
 require "optparse"
 
@@ -35,7 +35,7 @@ module SimpleFinder
       @target_dirs.each do |target_dir|
         target_dir = Pathname(target_dir)
         target_dir.find do |fname|
-          if IgnoreChecker.ignore_file?(fname, :include_directory => !@options[:file_only])
+          if FileFilter.ignore_file?(fname, :include_directory => !@options[:file_only])
             next
           end
           execute(target_dir, fname)
@@ -122,8 +122,8 @@ module SimpleFinder
 
       src = args.shift
       if src.nil?
-        puts "使い方: #{Pathname.new($0).basename} [オプション] 検索文字列 ファイル..."
-        puts "`#{Pathname.new($0).basename} --help' でより詳しい情報が表示されます。"
+        puts "使い方: #{Pathname.new($0).basename} [オプション] <検索文字列> <ファイル or ディレクトリ>..."
+        puts "`#{Pathname.new($0).basename} --help' でより詳しい情報を表示します。"
         abort
       end
 

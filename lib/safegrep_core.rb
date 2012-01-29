@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-require_relative 'ignore_checker'
+require_relative 'file_filter'
 
-module SimpleGrep
+module Safegrep
   class Core
     def self.run(*args)
       new(*args).run
@@ -42,7 +42,7 @@ module SimpleGrep
     def run
       @target_files.each do |target_file|
         Pathname(target_file).find do |filename|
-          if IgnoreChecker.ignore_file?(filename)
+          if FileFilter.ignore_file?(filename)
             if @options[:debug]
               puts "skip: #{filename}"
             end

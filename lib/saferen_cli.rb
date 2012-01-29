@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-# ファイル and ディレクトリ名置換ツール
+#
+# ファイル and ディレクトリ名置換スクリプト
+#
 
-require "optparse"
-require_relative 'ignore_checker'
+require 'optparse'
+require_relative 'file_filter'
 
 module Saferen
+  VERSION = "2.0.1".freeze
+
   class Core
     def self.run(*args, &block)
       new(*args, &block).run
@@ -30,15 +34,13 @@ module Saferen
       puts "置換情報:【#{@source_regexp.source}】=>【#{@dest_text}】(大小文字を区別#{@source_regexp.casefold? ? "しない" : "する"})"
 
       @targets = []
-      @files.each{|file|
+      @files.each do |file|
         file = Pathname(file).expand_path
-        file.find{|f|
-          if f.to_s.match(/(\.(svn|git)|\bcvs|\brcs)\b/i)
-            next
-          end
+        file.find do |f|
+          next if f.to_s.match(/(\.(svn|git)|\bcvs|\brcs)\b/i)
           @targets << f
-        }
-      }
+        end
+      end
 
       @targets.uniq!
     end
@@ -105,10 +107,15 @@ module Saferen
     end
 
     def result_display
-      puts @log unless @log.empty?
+      unless @log.empty?
+        puts @log
+      end
       puts
       puts "#{@replace_count} 個所を置換しました。"
-      puts "\n本当に置換するには -x オプションを付けてください。" unless @options[:exec]
+      puts
+      unless @options[:exec]
+        puts "本当に置換するには -x オプションを付けてください。"
+      end
     end
   end
 
@@ -117,22 +124,21 @@ module Saferen
       options = {}
 
       oparser = OptionParser.new do |oparser|
-        oparser.version = "2.0.0"
+        oparser.version = VERSION
         oparser.banner = [
-          "ファイル・デイレクトリ名置換スクリプト #{oparser.ver}\n\n",
-          "使い方: #{oparser.program_name} [オプション] 置換元 置換後 ファイル...\n\n",
+          "ファイル・デイレクトリ名置換スクリプト #{oparser.ver}\n",
+          "使い方: #{oparser.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
         ].join
-        oparser.on_head("オプション")
-        oparser.on
+        oparser.on_head("オプション:")
         oparser.on("-x", "--exec", "実際に置換する"){|v|options[:exec] = v}
         oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|v|options[:ignocase] = v}
         oparser.on("-w", "--word-regexp", "単語とみなす"){|v|options[:word] = v}
-        oparser.on("--svn", "svn mv コマンドでリネーム"){|v|options[:svn_mv] = v}
+        # oparser.on("--svn", "svn mv コマンドでリネーム"){|v|options[:svn_mv] = v}
         oparser.on("--git", "git mv コマンドでリネーム"){|v|options[:git_mv] = v}
       end
 
       begin
-        oparser.parse!(args)
+        args = oparser.parse(args)
       rescue OptionParser::InvalidOption
         puts "オプションが間違っています。"
         abort
@@ -141,7 +147,9 @@ module Saferen
       source_regexp = args.shift
       dest_text = args.shift
       if source_regexp.nil? || dest_text.nil?
-        puts oparser
+        puts "使い方: #{oparser.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>..."
+        puts "`#{oparser.program_name} --help' でより詳しい情報を表示します。"
+        abort
       end
 
       if args.empty?

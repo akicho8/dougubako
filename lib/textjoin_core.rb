@@ -3,7 +3,7 @@ require "pathname"
 require "stringio"
 require "fileutils"
 
-require_relative 'ignore_checker'
+require_relative 'file_filter'
 
 module TextJoin
   class Core
@@ -42,7 +42,7 @@ module TextJoin
     def all_files
       target_dirs.each do |target_dir|
         target_dir.find do |filename|
-          if IgnoreChecker.ignore_file?(filename)
+          if FileFilter.ignore_file?(filename)
             @filter_files << filename
             next
           end
