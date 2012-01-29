@@ -13,7 +13,7 @@ module Saferenum
 
   class Core
     attr_reader :options
-    attr_accessor :count
+    attr_accessor :counts
 
     def self.run(*args, &block)
       new(*args, &block).run
@@ -22,18 +22,16 @@ module Saferenum
     def initialize(dirs, options)
       @dirs = dirs
       @options = options
-      @count = 0
+      @counts = Hash.new(0)
     end
 
     def run
       @dirs.each{|dir|
         Runner.new(self, dir)
       }
-      puts
-      puts "#{@count} 個を処理しました。"
-      puts
+      puts "差分:#{@counts[:diff]} ディレクトリ数:#{@counts[:diff]} ファイル数:#{@counts[:count]} 個を処理しました。"
       unless @options[:exec]
-        puts "本当に実行するには -x オプションを付けてください"
+        puts "本当に実行するには -x オプションを付けてください。"
       end
     end
 
@@ -64,7 +62,6 @@ module Saferenum
           return
         end
 
-        puts "[DIR] #{dir} (#{files.size} files)"
         run_core(dir, files)
       end
 
@@ -74,6 +71,9 @@ module Saferenum
       # dir で files を処理する
       #
       def run_core(dir, files)
+        puts "[DIR] #{dir} (#{files.size} files)"
+        @base.counts[:dir] += 1
+
         if @base.options[:exec]
           tmpdir = Pathname("#{dir}/#{SecureRandom.hex}")
           FileUtils.mkdir(tmpdir, :noop => @base.options[:noop], :verbose => @base.options[:verbose])
@@ -91,8 +91,18 @@ module Saferenum
             rest = md[:rest]
           end
           renamed_file = file.dirname + [number_format(files, index), rest].join
-          puts "      [#{index.next}/#{files.size}]  #{file.basename} => #{renamed_file.basename}"
-          @base.count += 1
+          mark = " "
+          diff = false
+          if file.basename.to_s != renamed_file.basename.to_s
+            mark = "U"
+            diff = true
+            @base.counts[:diff] += 1
+          end
+          index_str = "[#{index.next.to_s.rjust(files.size.to_s.size)}/#{files.size}]"
+          if diff || @base.options[:verbose]
+            puts "  #{mark} #{index_str} #{file.basename} => #{renamed_file.basename}"
+          end
+          @base.counts[:count] += 1
           if @base.options[:exec]
             FileUtils.mv(tmpdir + file.basename, renamed_file, :noop => @base.options[:noop], :verbose => @base.options[:verbose])
           end
@@ -151,7 +161,15 @@ module Saferenum
         oparser.on("--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer){|v|options[:base] = v}
         oparser.on("--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer){|v|options[:step] = v}
         oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})"){|v|options[:verbose] = v}
-        oparser.on_tail("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
+        oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
+        oparser.on(<<-EOT)
+
+サンプル:
+    例1. カレントディレクトリの《数字_名前.拡張子》形式のファイルを同じ形式でリナンバーする
+        % #{oparser.program_name} .
+    例2. 指定ディレクトリ以下のすべてのファイルを《数字.拡張子》形式にリネームする
+        % #{oparser.program_name} -arn ~/Pictures/Archives
+EOT
       end
 
       begin
@@ -173,7 +191,8 @@ module Saferenum
 end
 
 if $0 == __FILE__
-  Saferenum::CLI.execute(["--all", "--number-only", "~/Pictures/がさいゆの"])
-  Saferenum::CLI.execute(["#{Pathname(__FILE__).dirname}/_pictures"])
-  Saferenum::CLI.execute(["-r", "#{Pathname(__FILE__).dirname}/_pictures"])
+  Saferenum::CLI.execute(["--recursive", "--all", "--number-only", "~/Pictures/renum"])
+  # Saferenum::CLI.execute(["--all", "--number-only", "~/Pictures/がさいゆの"])
+  # Saferenum::CLI.execute(["#{Pathname(__FILE__).dirname}/_pictures"])
+  # Saferenum::CLI.execute(["-r", "#{Pathname(__FILE__).dirname}/_pictures"])
 end

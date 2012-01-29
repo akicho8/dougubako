@@ -110,9 +110,7 @@ module Saferen
       unless @log.empty?
         puts @log
       end
-      puts
       puts "#{@replace_count} 個所を置換しました。"
-      puts
       unless @options[:exec]
         puts "本当に置換するには -x オプションを付けてください。"
       end
