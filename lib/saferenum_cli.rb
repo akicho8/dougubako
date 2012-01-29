@@ -43,10 +43,12 @@ module Saferenum
       def initialize(base, dir)
         @base = base
         dir = Pathname(dir).expand_path
-        all = dir.each_child                                       # すべてのファイルとディレクトリ
-        all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)}.sort # . .. .git _ などで始まるものを消して必要なものだけに絞る
-        files = all.find_all{|entry|!entry.directory?}             # ファイルのみ
-        dirs = all.find_all{|entry|entry.directory?}               # ディレクトリのみ
+        all = dir.each_child                                  # すべてのファイルとディレクトリ
+        all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)} # . .. .git _ などで始まるものを消して必要なものだけに絞る
+        all = reject(all)
+        all = all.sort
+        files = all.find_all{|entry|!entry.directory?}        # ファイルのみ
+        dirs = all.find_all{|entry|entry.directory?}          # ディレクトリのみ
 
         # サブディレクトリを処理
         if @base.options[:recursive]
@@ -65,6 +67,8 @@ module Saferenum
         puts "[DIR] #{dir} (#{files.size} files)"
         run_core(dir, files)
       end
+
+      private
 
       #
       # dir で files を処理する
@@ -106,6 +110,14 @@ module Saferenum
         width = (@base.options[:base] + files.size * @base.options[:step]).to_s.size
         i = @base.options[:base] + index * @base.options[:step]
         "%0*d" % [width + 1, i]
+      end
+
+      #
+      # テンポラリファイルを除く
+      #
+      def reject(all)
+        all = all.reject{|e|e.to_s.match(Regexp.union("#", "~", "%"))}
+        all = all.reject{|e|e.to_s.match(/\.(elc)\z/)}
       end
     end
   end
