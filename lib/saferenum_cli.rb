@@ -13,24 +13,26 @@ module Saferenum
 
   class Core
     attr_reader :options
-    
+    attr_accessor :count
+
     def self.run(*args, &block)
       new(*args, &block).run
     end
 
-    def initialize(target_dirs, options)
-      @target_dirs = target_dirs
+    def initialize(dirs, options)
+      @dirs = dirs
       @options = options
+      @count = 0
     end
 
     def run
-      @target_dirs.each{|target_dir|
-        Runner.new(self, target_dir)
+      @dirs.each{|dir|
+        Runner.new(self, dir)
       }
       puts
-      if @options[:exec]
-        puts "実行完了"
-      else
+      puts "#{@count} 個を処理しました。"
+      puts
+      unless @options[:exec]
         puts "本当に実行するには -x オプションを付けてください"
       end
     end
@@ -86,6 +88,7 @@ module Saferenum
           end
           renamed_file = file.dirname + [number_format(files, index), rest].join
           puts "      [#{index.next}/#{files.size}]  #{file.basename} => #{renamed_file.basename}"
+          @base.count += 1
           if @base.options[:exec]
             FileUtils.mv(tmpdir + file.basename, renamed_file, :noop => @base.options[:noop], :verbose => @base.options[:verbose])
           end
