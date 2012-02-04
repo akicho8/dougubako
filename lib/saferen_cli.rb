@@ -22,6 +22,7 @@ module Saferen
       @log = []
       @replace_count = 0
       @backup_dir = Pathname.new("~/tmp").expand_path
+      @counts = Hash.new(0)
 
       option = 0
       if @options[:ignocase]
@@ -77,6 +78,10 @@ module Saferen
             if command = vc_mv_command(fname, new_fname)
               puts command
             end
+            if new_fname.exist?
+              puts "CollisionError: #{new_fname}"
+              @counts[:collision] += 1
+            end
             if @options[:exec]
               if command
                 $defout << `#{command}`
@@ -110,6 +115,7 @@ module Saferen
       unless @log.empty?
         puts @log
       end
+      puts "重複: #{@counts[:collision]} 個"
       puts "#{@replace_count} 個所を置換しました。"
       unless @options[:exec]
         puts "本当に置換するには -x オプションを付けてください。"
@@ -160,5 +166,6 @@ module Saferen
 end
 
 if $0 == __FILE__
-  Saferen::CLI.execute(ARGV)
+  Saferen::CLI.execute(["0011", "00xx", "~/src/three_kingdoms/public/master_images/quest_area"])
+  # Saferen::CLI.execute(ARGV)
 end
