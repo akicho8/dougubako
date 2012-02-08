@@ -9,7 +9,7 @@ require 'fileutils'
 require_relative 'file_filter'
 
 module Saferenum
-  VERSION = "1.0.0"
+  VERSION = "1.1.0"
 
   class Core
     attr_reader :options
@@ -84,7 +84,7 @@ module Saferenum
         end
 
         files.each_with_index{|file, index|
-          if @base.options[:number_only]
+          if @base.options[:reject_basename]
             rest = file.extname
           else
             md = file.basename.to_s.match(/\A(\d*)(?<rest>.*)/) or raise "ファイル名が 0123_foo.txt 形式じゃない"
@@ -119,7 +119,11 @@ module Saferenum
       def number_format(files, index)
         width = (@base.options[:base] + files.size * @base.options[:step]).to_s.size
         i = @base.options[:base] + index * @base.options[:step]
-        "%0*d" % [width + 1, i]
+        if @base.options[:number_only]
+          "%d" % i
+        else
+          "%0*d" % [width + @base.options[:zero], i]
+        end
       end
 
       #
@@ -135,16 +139,18 @@ module Saferenum
   module CLI
     def self.execute(args)
       options = {
-        # CLで指定できるもの
-        :exec        => false,  # 本当に実行するか？
-        :all         => false,  # true:全ファイルを処理する false:数字のついたものだけが対象
-        :recursive   => false,  # サブディレクトリも対象にする
-        :verbose     => false,  # 詳細表示
-        :number_only => false,  # true:数字以外を消す false:数字以外を保持する
-        :base        => 100,    # インデックスの最初
-        :step        => 10,     # インデックスのステップ
-        # CLで指定できないもの
-        :noop        => $DEBUG, # デバッグ時は true にする
+                                    # CLで指定できるもの
+        :exec            => false,  # 本当に実行するか？
+        :all             => false,  # true:全ファイルを処理する false:番号のついたものだけが対象
+        :recursive       => false,  # サブディレクトリも対象にする
+        :verbose         => false,  # 詳細表示
+        :reject_basename => false,  # true:番号以外を消す false:番号以外を保持する
+        :base            => 100,    # インデックスの最初
+        :step            => 10,     # インデックスのステップ
+        :zero            => 1,      # 幅の余白
+        :number_only     => false,  # 番号だけにする
+                                    # CLで指定できないもの
+        :noop            => $DEBUG, # デバッグ時は true にする
       }
 
       oparser = OptionParser.new do |oparser|
@@ -157,18 +163,20 @@ module Saferenum
         oparser.on("-x", "--exec", "実際に実行する(デフォルト:#{options[:exec]})"){|v|options[:exec] = v}
         oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})"){|v|options[:recursive] = v}
         oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-n", "--number-only", "番号だけにする？(デフォルト:#{options[:number_only]})"){|v|options[:number_only] = v}
+        oparser.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})"){|v|options[:reject_basename] = v}
         oparser.on("--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer){|v|options[:base] = v}
         oparser.on("--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer){|v|options[:step] = v}
+        oparser.on("--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer){|v|options[:zero] = v}
+        oparser.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass){|v|options[:number_only] = v}
         oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})"){|v|options[:verbose] = v}
         oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 
 サンプル:
-    例1. カレントディレクトリの《数字_名前.拡張子》形式のファイルを同じ形式でリナンバーする
+    例1. カレントディレクトリの《番号_名前.拡張子》形式のファイルを同じ形式でリナンバーする
         % #{oparser.program_name} .
-    例2. 指定ディレクトリ以下のすべてのファイルを《数字.拡張子》形式にリネームする
-        % #{oparser.program_name} -arn ~/Pictures/Archives
+    例2. 指定ディレクトリ以下のすべてのファイルを《番号.拡張子》形式にリネームする
+        % #{oparser.program_name} -rac ~/Pictures/Archives
 EOT
       end
 
@@ -191,8 +199,8 @@ EOT
 end
 
 if $0 == __FILE__
-  Saferenum::CLI.execute(["--recursive", "--all", "--number-only", "~/Pictures/renum"])
-  # Saferenum::CLI.execute(["--all", "--number-only", "~/Pictures/がさいゆの"])
+  Saferenum::CLI.execute(["--recursive", "--all", "--reject-basename", "~/Pictures/Archives"])
+  # Saferenum::CLI.execute(["--all", "--reject-basename", "~/Pictures/Archives/アルパカ"])
   # Saferenum::CLI.execute(["#{Pathname(__FILE__).dirname}/_pictures"])
   # Saferenum::CLI.execute(["-r", "#{Pathname(__FILE__).dirname}/_pictures"])
 end
