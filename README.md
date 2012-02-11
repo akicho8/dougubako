@@ -68,7 +68,7 @@
         例2. 指定ディレクトリ以下のすべてのファイルを《番号.拡張子》形式にリネームする
             % n -rac ~/Pictures/Archives
 
-## カレントディレクトリのファイルをリナンバーするには？(BASICのRENUM相当)
+## BASIC の RENUM コマンドのようにファイル名をリナンバーする例
 
     ~/.emacs.d $ n .
     [DIR] /Users/alice/.emacs.d (101 files)
@@ -89,7 +89,9 @@
     (snip)
     差分:94 ディレクトリ数:94 ファイル数:101 個を処理しました。
 
-## 階層ディレクトリの中にある画像をすべて連番にして整理するには？
+## 階層ディレクトリをすべて対象にする
+
+    ※ --all ですべてのファイルを対象にして --reject-basename で元のファイル名をカットする
 
     $ n --recursive --all --reject-basename ~/Pictures
     [DIR] /Users/alice/Pictures/Archives/深海魚 (20 files)
@@ -101,14 +103,43 @@
     差分:4 ディレクトリ数:4 ファイル数:4 個を処理しました。
     本当に実行するには -x オプションを付けてください。
 
-## 階層ディレクトリの中にある画像をすべて1からはじまる数値のみの連番にするには？
+## 1からはじまる数値のみの連番にするには？
 
-    $ n --recursive --all --number-only --base=1 --step=1 ~/Pictures
-    [DIR] /Users/alice/src/project/images/a (20 files)
-      U [ 1/20] 2.jpg => 1.jpg
-      U [ 2/20] 4.jpg => 2.jpg
-    [DIR] /Users/alice/src/project/images/b (30 files)
+    --base から --step ごとにインクリメント
+    --number-only で 0 のプレフィクスをつけない
+
+    $ n --recursive --all --number-only --base=1 --step=1 images
+    [DIR] images/a (20 files)
+      U [ 1/20] a.jpg => 1.jpg
+      U [ 2/20] c.jpg => 2.jpg
+    [DIR] images/b (30 files)
       U [ 1/30] 3.jpg => 1.jpg
       U [ 2/30] 5.jpg => 2.jpg
     差分:4 ディレクトリ数:4 ファイル数:4 個を処理しました。
     本当に実行するには -x オプションを付けてください。
+
+## cronに仕掛けておくことで画像ディレクトリを自動整理
+
+    0 6 * * * n -racx ~/Pictures/Archives | nkf -j
+
+    [DIR] /Users/alice/Pictures/Archives/壁紙 (20 files)
+    U [ 1/20] 010b9417.jpg => 0100.jpg
+    U [ 2/20] 02827811.jpg => 0110.jpg
+    U [ 3/20] 0e21bff0.jpg => 0120.jpg
+    U [ 4/20] 102264ad.jpg => 0130.jpg
+    U [ 5/20] 116fbe08.jpg => 0140.jpg
+    U [ 6/20] 12636f63.jpg => 0150.jpg
+    U [ 7/20] 143c9d2d.jpg => 0160.jpg
+    U [ 8/20] 165c586f.jpg => 0170.jpg
+    U [ 9/20] 1758ec7f.jpg => 0180.jpg
+    U [10/20] 19a9b86e.jpg => 0190.jpg
+    U [11/20] 24942625.jpg => 0200.jpg
+    U [12/20] 27061b37.jpg => 0210.jpg
+    U [13/20] 2a24bc45.jpg => 0220.jpg
+    U [14/20] 2ac04638.jpg => 0230.jpg
+    U [15/20] 30111072.jpg => 0240.jpg
+    U [16/20] 31bc63a8.jpg => 0250.jpg
+    U [17/20] 3bca8b86.jpg => 0260.jpg
+    U [18/20] 3e9b6c4e.jpg => 0270.jpg
+    U [19/20] 3ebf5a47.jpg => 0280.jpg
+    U [20/20] 3f746de3.jpg => 0290.jpg
