@@ -101,7 +101,21 @@ module Safefile
       # 最後の空行を取る
       new_content = new_content.rstrip + ret_code
 
-      # 改行しかないのなら空にする
+      # 固まっている重複行を一つにする
+      #
+      #   b a a b b a => b a b a
+      #
+      if @options[:uniq]
+        lines = new_content.lines.to_a
+        lines.each_with_index{|line, i|
+          if line == lines[i.next]
+            lines[i] = nil
+          end
+        }
+        new_content = lines.compact.join
+      end
+
+      # コンテンツが改行しかないのなら空にする
       if new_content.match(/\A#{ret_code}\z/)
         new_content = ""
       end
@@ -148,6 +162,7 @@ module Safefile
         :hankaku_space      => true,
         :hankaku            => true,
         :diff               => false,
+        :uniq               => false,
         # :quiet            => false,
         :windows            => false,
         :rstrip             => true,
@@ -168,6 +183,7 @@ module Safefile
         oparser.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(初期値:#{options[:hankaku]})"){|v|options[:hankaku] = v}
         oparser.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(初期値:#{options[:hankaku_space]})"){|v|options[:hankaku_space] = v}
         oparser.on("-d", "--[no-]diff", "diffの表示(初期値:#{options[:diff]})"){|v|options[:diff] = v}
+        oparser.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(初期値:#{options[:uniq]})"){|v|options[:uniq] = v}
         oparser.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(初期値:#{options[:windows]})"){|v|options[:windows] = v}
         oparser.on("-f", "--force", "強制置換する"){|v|options[:force] = v}
         # oparser.on("-q", "--quiet", "静かにする(初期値:#{options[:quiet]})"){|v|options[:quiet] = v}
@@ -201,5 +217,6 @@ EOT
 end
 
 if $0 == __FILE__
-  Safefile::CLI.execute(["-rdfzZ", "safe*.rb"])
+  # Safefile::CLI.execute(["-rdfzZ", "safe*.rb"])
+  Safefile::CLI.execute(["-du", "_test.txt"])
 end

@@ -6,7 +6,8 @@ describe do
   before do
     FileUtils.mkdir_p("testdir/a/b")
     open("testdir/a/file1.txt", "w"){|f|f << "バトルシティー \nルート１６ターボ"}
-    open("testdir/a/b/file2.txt", "w"){|f|f << "キン肉マン　マッスルタッグマッチ"}
+    open("testdir/a/file2.txt", "w"){|f|f << ["a", "x", "a", "a"].join("\n")}
+    open("testdir/a/b/file3.txt", "w"){|f|f << "キン肉マン　マッスルタッグマッチ"}
   end
 
   after do
@@ -19,13 +20,14 @@ describe do
 
   context "実行結果の確認" do
     before do
-      @output = `#{LIB_ROOT}/bin/safefile -rd testdir`
+      @output = `#{LIB_ROOT}/bin/safefile -rdu testdir`
       # puts @output
     end
     it do
       @output.should match(/\+ キン肉マン マッスルタッグマッチ/)
       @output.should match(/\+ バトルシティー$/)
       @output.should match(/\+ ルート16ターボ$/)
+      @output.should match(/\- a$/)
     end
   end
 end
