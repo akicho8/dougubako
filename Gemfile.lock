@@ -1,9 +1,0 @@
-GEM
-  specs:
-    rspec-core (2.8.0)
-
-PLATFORMS
-  ruby
-
-DEPENDENCIES
-  rspec-core

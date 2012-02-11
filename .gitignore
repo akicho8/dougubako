@@ -5,3 +5,4 @@
 /lib/_*
 /lib/log
 /README.html
+/Gemfile.lock
