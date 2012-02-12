@@ -41,10 +41,9 @@ module Saferenum
       def initialize(base, dir)
         @base = base
         dir = Pathname(dir).expand_path
-        all = dir.each_child                                  # すべてのファイルとディレクトリ
-        all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)} # . .. .git _ などで始まるものを消して必要なものだけに絞る
-        all = reject(all)
-        all = all.sort
+        all = dir.children                                    # すべてのファイルとサブディレクトリ
+        all = reject_files(all)
+        all = all.sort                                        # TODO:数値としてソートする機能を入れる
         files = all.find_all{|entry|!entry.directory?}        # ファイルのみ
         dirs = all.find_all{|entry|entry.directory?}          # ディレクトリのみ
 
@@ -85,11 +84,14 @@ module Saferenum
 
         files.each_with_index{|file, index|
           if @base.options[:reject_basename]
+            # "0123_foo.txt" から ".txt" の部分を取得
             rest = file.extname
           else
-            md = file.basename.to_s.match(/\A(\d*)(?<rest>.*)/) or raise "ファイル名が 0123_foo.txt 形式じゃない"
+            # "0123_foo.txt" から "_foo.txt" の部分を取得
+            md = file.basename.to_s.match(/\A(\d*)(?<rest>.*)/) or raise "ファイル名が 0123_foo.txt 形式ではありません"
             rest = md[:rest]
           end
+          # "0100" + "_foo.txt" または "0100" + ".txt" となる
           renamed_file = file.dirname + [number_format(files, index), rest].join
           mark = " "
           diff = false
@@ -114,7 +116,7 @@ module Saferenum
       end
 
       #
-      # ファイル名のプレフィクス
+      # ファイル名のプレフィクスを取得
       #
       def number_format(files, index)
         width = (@base.options[:base] + files.size * @base.options[:step]).to_s.size
@@ -127,10 +129,11 @@ module Saferenum
       end
 
       #
-      # テンポラリファイルを除く
+      # 不要なファイルやディレクトリを除外する
       #
-      def reject(all)
-        all = all.reject{|e|e.to_s.match(Regexp.union("#", "~", "%"))}
+      def reject_files(all)
+        all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)}           # .svn .git _* などを除外
+        all = all.reject{|e|e.to_s.match(Regexp.union("#", "~", "%"))}  # テンポラリファイルを除外
         all = all.reject{|e|e.to_s.match(/\.(elc)\z/)}
       end
     end
@@ -171,7 +174,6 @@ module Saferenum
         oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})"){|v|options[:verbose] = v}
         oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
-
 サンプル:
     例1. カレントディレクトリの《番号_名前.拡張子》形式のファイルを同じ形式でリナンバーする
         % #{oparser.program_name} .
