@@ -7,6 +7,7 @@ describe do
     FileUtils.makedirs(Pathname("testdir"))
     open("testdir/a.txt", "w") {|f|f.write("foo _foo_ FOO")}
     open("testdir/b.txt", "w") {|f|f.write("a($var)a($var)a")}
+    open("testdir/c.txt", "w") {|f|f.write("ﾊﾝｶｸとゼンカク")}
     File.chmod(0777, "testdir/a.txt")
   end
 
@@ -17,7 +18,8 @@ describe do
   it "main" do
     `#{LIB_ROOT}/bin/saferep    foo bar testdir`.lines.grep(/→【bar _bar_ FOO】/).size.should == 1
     `#{LIB_ROOT}/bin/saferep -w foo bar testdir`.lines.grep(/→【bar _foo_ FOO】/).size.should == 1
-    `#{LIB_ROOT}/bin/saferep -i foo bar testdir`.lines.grep(/→【bar _bar_ bar】/).size.should == 1
+    `#{LIB_ROOT}/bin/saferep    ﾊﾝ xx   testdir`.lines.grep(/→【xxｶｸとゼンカク】/).size.should == 1
+    `#{LIB_ROOT}/bin/saferep -u カク xx testdir`.lines.grep(/→【ハンxxとゼンxx】/).size.should == 1
   end
 
   it "option_x" do

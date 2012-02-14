@@ -3,17 +3,18 @@
 # 文字列検索ツール
 #
 
-require 'optparse'
-require_relative 'safegrep_core'
+require "optparse"
+require_relative "safegrep_core"
 
 module Safegrep
-  VERSION = '2.0.1'.freeze
+  VERSION = "2.0.2".freeze
 
   module CLI
     def self.execute(args)
       options = {
         :no_comment_skip => false,
         :debug => false,
+        :toutf8 => false,
       }
 
       oparser = OptionParser.new do |oparser|
@@ -27,6 +28,7 @@ module Safegrep
         oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
         oparser.on("-s", "検索文字列をエスケープ") {|v|options[:escape] = v}
         oparser.on("-a", "#で始まる行をスキップしない"){|v|options[:no_comment_skip] = v}
+        oparser.on("-u", "--[no-]utf8", "内部でtoutf8した結果に対して検索する(旧デフォルト。ハンカクカナを全角カナとみなす。初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("-d", "--debug", "デバッグモード"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
       end
@@ -40,7 +42,7 @@ module Safegrep
 
       if args.empty?
         puts "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>..."
-        puts "`#{oparser.program_name} --help' でより詳しい情報を表示します。"
+        puts "`#{oparser.program_name}' --help でより詳しい情報を表示します。"
         abort
       end
 

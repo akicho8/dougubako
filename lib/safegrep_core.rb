@@ -13,9 +13,12 @@ module Safegrep
 
       @options = {
         :print => true,
+        :toutf8 => false,
       }.merge(options)
 
-      @source_string = @source_string.toutf8
+      if @options[:toutf8]
+        @source_string = @source_string.toutf8
+      end
 
       @log = []
       @total_count = 0
@@ -67,8 +70,11 @@ module Safegrep
       rescue Errno::EISDIR => error
         STDERR.puts "警告: #{error}"
       else
+        if @options[:toutf8]
+          buffer = buffer.toutf8
+        end
         css_flag = filename.extname.match(/\.(css|scss)\z/)
-        buffer.toutf8.lines.each_with_index do |line, index|
+        buffer.lines.each_with_index do |line, index|
           if !css_flag && !@options[:no_comment_skip]
             if line.match(/^\s*#/)
               next

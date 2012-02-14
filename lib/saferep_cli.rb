@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# -*- compile-command: "ruby -Ku test_saferep.rb -v" -*-
+# -*- compile-command: "ruby test_saferep.rb -v" -*-
 # テキストファイル置換ツール
 
 require "optparse"
@@ -7,7 +7,7 @@ require "timeout"
 require_relative 'file_filter'
 
 module Saferep
-  VERSION = "2.0.2"
+  VERSION = "2.0.3"
 
   class Core
     def self.run(*args)
@@ -18,7 +18,9 @@ module Saferep
       @src = src
       @dst = dst
       @files = files
-      @options = options
+      @options = {
+        :timeout => 1.0,
+      }.merge(options)
 
       @log = []
       @replace_count = 0
@@ -53,11 +55,11 @@ module Saferep
             end
             result = true
             begin
-              timeout(1.0) {
+              timeout(@options[:timeout]) {
                 result = FileFilter.ignore_file?(fname)
               }
             rescue Timeout::Error
-              puts "#{fname} の読み込みに時間がかかりすぎです。"
+              puts "【警告】#{fname} の読み込みに時間がかかりすぎです。"
               result = true
             end
             if result || fname.basename.to_s.match(/(ChangeLog|\.diff)$/i)
@@ -84,16 +86,21 @@ module Saferep
       count = 0
       out = []
       content = fname.read
-      content = content.toutf8
-      if @options[:sjis]
-        guess = NKF::SJIS
-      else
-        if @options[:guess]
-          guess = NKF.guess(content)
+      guess = nil
+
+      if @options[:toutf8]
+        content = content.toutf8
+        if @options[:sjis]
+          guess = NKF::SJIS
         else
-          guess = NKF::UTF8
+          if @options[:guess]
+            guess = NKF.guess(content)
+          else
+            guess = NKF::UTF8
+          end
         end
       end
+
       content.lines.each_with_index{|line, index|
         new_line = line.clone
         do_gsub = true
@@ -121,13 +128,18 @@ module Saferep
         end
         out << new_line
       }
-      @log << "#{fname} (changed #{count})" if count > 0
+      if count > 0
+        @log << "#{fname} (changed #{count})"
+      end
       if @options[:exec]
         if count > 0
           bak = backupfile(fname)
           fname.rename(bak)
           if bak.exist?
-            out = Kconv.kconv(out.join, guess, NKF::UTF8)
+            out = out.join
+            if guess
+              out = Kconv.kconv(out.join, guess, NKF::UTF8)
+            end
             fname.open("w"){|f|f << out}
             # 権限復旧
             fname.chmod(bak.stat.mode)
@@ -140,11 +152,14 @@ module Saferep
     def result_display
       unless @log.empty?
         puts
-        puts @log.join("\n") << "\n"
-        puts
+        puts @log.join("\n")
       end
+      puts
       puts "結果: #{@log.size} 個のファイルの計 #{@replace_count} 個所を置換しました。(フェッチ数: #{@fetch_count})"
-      puts "\n本当に置換するには -x オプションを付けてください。" unless @options[:exec]
+      unless @options[:exec]
+        puts
+        puts "本当に置換するには -x オプションを付けてください。"
+      end
     end
 
     def backupfile(fname)
@@ -160,7 +175,9 @@ module Saferep
 
   module CLI
     def self.execute(args)
-      options = {}
+      options = {
+        :toutf8 => false,
+      }
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
@@ -175,46 +192,41 @@ module Saferep
         oparser.on("-d", "--debug", "デバッグ"){|v|options[:debug] = v}
         oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(デフォルトはすべてUTF-8とみなす)"){|v|options[:guess] = v}
         oparser.on("--sjis", "文字コードをすべてsjisとする"){|v|options[:sjis] = v}
+        oparser.on("-u", "--[no-]utf8", "内部でtoutf8した結果に対して置換する(旧デフォルト。ハンカクカナが全角カナになる。初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("--head=N", "先頭のn行のみが対象", Integer){|v|options[:head] = v}
         oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 サンプル:
 
-    例1. foo という文字列を bar に置換するには？ (カレント以下のテキストファイルが対象)
+  例1. foo という文字列を bar に置換するには？ (カレント以下のテキストファイルが対象)
+    $ #{oparser.program_name} foo bar
 
-        % #{oparser.program_name} foo bar
+  例2. foo という単語を bar に置換するには？
+    $ #{oparser.program_name} -w foo bar
 
-    例2. foo という単語を bar に置換するには？
+  例3. foo123 のように後ろに不定の数字がついた単語を bar(123) に置換するには？
+    $ #{oparser.program_name} -w "foo(\\d+)" 'bar(\#{$1})'
 
-        % #{oparser.program_name} -w foo bar
+  例4. 行末のスペースを削除するには？
+    $ #{oparser.program_name} "\\s+$" "\\n"
 
-    例3. foo123 のように後ろに不定の数字がついた単語を bar(123) に置換するには？
+  例5. func(1, 2) を func(2, 1) にするには？
+    $ #{oparser.program_name} "func\\((.*?),(.*?)\\)" 'func(\#{$2},\#{$1})'
 
-        % #{oparser.program_name} -w "foo(\\d+)" 'bar(\#{$1})'
+  例6. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
+    $ #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
 
-    例4. 行末のスペースを削除するには？
+  例7. test-unit → rspec への簡易変換
+    $ #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
+    $ #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
+    $ #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
 
-        % #{oparser.program_name} "\\s+$" "\\n"
+  例8. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
+    $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
 
-    例5. func(1, 2) を func(2, 1) にするには？
-
-        % #{oparser.program_name} "func\\((.*?),(.*?)\\)" 'func(\#{$2},\#{$1})'
-
-    例6. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
-
-        % #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
-
-    例7. test-unit → rspec への簡易変換
-
-        % #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
-        % #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
-        % #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
-
-    例8. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
-
-        % #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
-
+  例9. 半角カナが含まれるファイルの置換を行ったときに半角カナが全角カナになるのを防ぐには？
+    $ #{oparser.program_name} --raw foo bar
 EOT
       end
 
