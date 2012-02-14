@@ -91,7 +91,7 @@ module Safegrep
     def result_display
       unless @log.empty?
         puts
-        puts @log.sort_by{|a|a[:count]}.collect{|e|"#{e[:filename]}: (#{e[:count]} hit)"}
+        puts @log.sort_by{|a|a[:count]}.collect{|e|"#{e[:filename]} (#{e[:count]} hit)"}
         puts
       end
       puts "結果: #{@log.size} 個のファイルを対象に #{@total_count} 個所を検索しました。"

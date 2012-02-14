@@ -121,7 +121,7 @@ module Saferep
         end
         out << new_line
       }
-      @log << "#{fname}: (changed #{count})" if count > 0
+      @log << "#{fname} (changed #{count})" if count > 0
       if @options[:exec]
         if count > 0
           bak = backupfile(fname)
