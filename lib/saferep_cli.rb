@@ -23,6 +23,7 @@ module Saferep
       }.merge(options)
 
       @log = []
+      @error_logs = []
       @replace_count = 0
       @backup_dir = Pathname("~/tmp").expand_path
       @fetch_count = 0
@@ -109,21 +110,26 @@ module Saferep
         end
         if do_gsub
           #  p [new_line, @srcreg, new_line.match(@srcreg)]
-          if new_line.gsub!(@srcreg) {
-              m = match = __MATCH__ = Regexp.last_match
-              count += 1
-              if @options.key?(:simple_text) && (@options[:simple_text].nil? || @options[:simple_text] == "2")
-                p "escape 2" if $DEBUG
-                @dst
-              else
-                eval(%("#{@dst}"), binding)
+          begin
+            if new_line.gsub!(@srcreg){
+                m = match = __MATCH__ = Regexp.last_match
+                count += 1
+                if @options.key?(:simple_text) && (@options[:simple_text].nil? || @options[:simple_text] == "2")
+                  p "escape 2" if $DEBUG
+                  @dst
+                else
+                  eval(%("#{@dst}"), binding)
+                end
+              }
+              puts "#{fname}(#{index.succ}):【#{line.strip}】→【#{new_line.strip}】"
+              if @options[:limit] && count >= @options[:limit]
+                @stop = true
+                break
               end
-            }
-            puts "#{fname}(#{index.succ}):【#{line.strip}】→【#{new_line.strip}】"
-            if @options[:limit] && count >= @options[:limit]
-              @stop = true
-              break
             end
+          rescue ArgumentError => error
+            @error_logs << "【読み込み失敗】: #{fname} (#{error})"
+            break
           end
         end
         out << new_line
@@ -153,6 +159,10 @@ module Saferep
       unless @log.empty?
         puts
         puts @log.join("\n")
+      end
+      unless @error_logs.empty?
+        puts
+        puts @error_logs.join("\n")
       end
       puts
       puts "結果: #{@log.size} 個のファイルの計 #{@replace_count} 個所を置換しました。(フェッチ数: #{@fetch_count})"

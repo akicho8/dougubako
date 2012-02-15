@@ -21,6 +21,7 @@ module Safegrep
       end
 
       @log = []
+      @error_logs = []
       @total_count = 0
 
       if @options[:escape]
@@ -75,16 +76,21 @@ module Safegrep
         end
         css_flag = filename.extname.match(/\.(css|scss)\z/)
         buffer.lines.each_with_index do |line, index|
-          if !css_flag && !@options[:no_comment_skip]
-            if line.match(/^\s*#/)
-              next
+          begin
+            if !css_flag && !@options[:no_comment_skip]
+              if line.match(/^\s*#/)
+                next
+              end
             end
-          end
-          line = line.clone
-          if line.gsub!(@source_string){count += 1; "【#{$&}】"}
-            if @options[:print]
-              puts "#{filename}(#{index.succ}): #{line.strip}"
+            line = line.clone
+            if line.gsub!(@source_string){count += 1; "【#{$&}】"}
+              if @options[:print]
+                puts "#{filename}(#{index.succ}): #{line.strip}"
+              end
             end
+          rescue ArgumentError => error
+            @error_logs << "【読み込み失敗】: #{filename} (#{error})"
+            break
           end
         end
       end
@@ -98,8 +104,12 @@ module Safegrep
       unless @log.empty?
         puts
         puts @log.sort_by{|a|a[:count]}.collect{|e|"#{e[:filename]} (#{e[:count]} hit)"}
-        puts
       end
+      unless @error_logs.empty?
+        puts
+        puts @error_logs.join("\n")
+      end
+      puts
       puts "結果: #{@log.size} 個のファイルを対象に #{@total_count} 個所を検索しました。"
     end
   end

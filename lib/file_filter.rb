@@ -33,7 +33,7 @@ module FileFilter
       /\.(cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|\.del-.*)\z/,
       /\.(fla|flv|avi||ttf|mp3|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xls|ppt|ico|pid|tmp)\z/i,
       # 単語
-      /\b(RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log)\b/i,
+      /\b(RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/i,
       /\b(cache|password_dic|coverage|public\/assets)\b/,
       /\b(doc\/app|coverage|pkg|ruby_sess)\b/,
       # ゴミ
