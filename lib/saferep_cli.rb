@@ -237,6 +237,9 @@ module Saferep
 
   例9. 半角カナと全角カナを同一視するには？
     $ #{oparser.program_name} --utf8 カナ かな
+
+  例10. シングルクォーテーションをダブルクォーテーションに変換
+    $ #{oparser.program_name} \"'\" \"\\\\\"\"
 EOT
       end
 
