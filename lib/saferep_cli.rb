@@ -235,8 +235,8 @@ module Saferep
   例8. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
     $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
 
-  例9. 半角カナが含まれるファイルの置換を行ったときに半角カナが全角カナになるのを防ぐには？
-    $ #{oparser.program_name} --raw foo bar
+  例9. 半角カナと全角カナを同一視するには？
+    $ #{oparser.program_name} --utf8 カナ かな
 EOT
       end
 
