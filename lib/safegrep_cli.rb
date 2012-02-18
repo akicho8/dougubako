@@ -118,6 +118,9 @@ module Safegrep
       if filename.extname.match(/\b(css|scss)\b/)
         return false
       end
+      if filename.extname.match(/\b(el)\b/)
+        return line.match(/^\s*;/)
+      end
       if line.match(/^\s*#/)
         return true
       end
