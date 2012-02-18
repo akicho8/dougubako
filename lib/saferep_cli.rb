@@ -207,39 +207,29 @@ module Saferep
         oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
-サンプル:
-
+実行例:
   例1. foo という文字列を bar に置換するには？ (カレント以下のテキストファイルが対象)
     $ #{oparser.program_name} foo bar
-
   例2. foo という単語を bar に置換するには？
     $ #{oparser.program_name} -w foo bar
-
   例3. foo123 のように後ろに不定の数字がついた単語を bar(123) に置換するには？
     $ #{oparser.program_name} -w "foo(\\d+)" 'bar(\#{$1})'
-
   例4. 行末のスペースを削除するには？
     $ #{oparser.program_name} "\\s+$" "\\n"
-
   例5. func(1, 2) を func(2, 1) にするには？
     $ #{oparser.program_name} "func\\((.*?),(.*?)\\)" 'func(\#{$2},\#{$1})'
-
-  例6. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
+  例6. シングルクォーテーションをダブルクォーテーションに変換
+    $ #{oparser.program_name} \"'\" \"\\\\\"\"
+  例7. 半角カナも含めて全角カナにするには？
+    $ #{oparser.program_name} --utf8 カナ かな
+  例8. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
     $ #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
-
-  例7. test-unit → rspec への簡易変換
+  例9. test-unit → rspec への簡易変換
     $ #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
     $ #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
     $ #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
-
-  例8. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
+  例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
     $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
-
-  例9. 半角カナと全角カナを同一視するには？
-    $ #{oparser.program_name} --utf8 カナ かな
-
-  例10. シングルクォーテーションをダブルクォーテーションに変換
-    $ #{oparser.program_name} \"'\" \"\\\\\"\"
 EOT
       end
 
