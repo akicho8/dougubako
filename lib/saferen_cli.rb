@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ファイル and ディレクトリ名置換スクリプト
+# ファイル and ディレクトリ名置換
 #
 
 require 'optparse'
@@ -130,7 +130,7 @@ module Saferen
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
-          "ファイル・デイレクトリ名置換スクリプト #{oparser.ver}\n",
+          "ファイル・デイレクトリ名置換 #{oparser.ver}\n",
           "使い方: #{oparser.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
         ].join
         oparser.on_head("オプション:")

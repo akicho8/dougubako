@@ -22,6 +22,8 @@ module Saferep
         :simple   => false,
         :word     => false,
         :toutf8   => false,
+        :tosjis   => false,
+        :guess    => false,
       }
     end
 
@@ -106,7 +108,7 @@ module Saferep
 
       if @options[:toutf8]
         content = content.toutf8
-        if @options[:sjis]
+        if @options[:tosjis]
           guess = NKF::SJIS
         else
           if @options[:guess]
@@ -210,45 +212,45 @@ module Saferep
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
-          "テキストファイル置換スクリプト #{oparser.ver}\n",
+          "テキストファイル置換 #{oparser.ver}\n",
           "使い方: #{oparser.program_name} [オプション] <置換前> <置換後> <ファイル or ディレクトリ>...\n"
         ].join
         oparser.on("オプション:")
         oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす(初期値:#{options[:word]})"){|v|options[:word] = v}
-        oparser.on("-s", "--simple", "置換前の文字列を普通のテキストと見なす(初期値:#{options[:simple]})"){|v|options[:simple] = v}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない(初期値:#{options[:ignocase]})"){|v|options[:ignocase] = v}
-        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})"){|v|options[:word] = v}
+        oparser.on("-s", "--simple", "置換前の文字列を普通のテキストと見なす(#{options[:simple]})"){|v|options[:simple] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})"){|v|options[:ignocase] = v}
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("レアオプション:")
-        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(初期値:#{options[:guess]})"){|v|options[:guess] = v}
-        oparser.on("--sjis", "文字コードをすべてsjisとする(初期値:#{options[:sjis]})"){|v|options[:sjis] = v}
+        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(#{options[:guess]})"){|v|options[:guess] = v}
+        oparser.on("--[no-]sjis", "文字コードをすべてsjisとする(#{options[:tosjis]})"){|v|options[:tosjis] = v}
         oparser.on("--head=N", "先頭のn行のみが対象", Integer){|v|options[:head] = v}
         oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
         oparser.on("-d", "--debug", "デバッグ用"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 実行例:
-  例1. foo という文字列を bar に置換するには？ (カレント以下のテキストファイルが対象)
-    $ #{oparser.program_name} foo bar
-  例2. foo という単語を bar に置換するには？
-    $ #{oparser.program_name} -w foo bar
-  例3. foo123 のように後ろに不定の数字がついた単語を bar(123) に置換するには？
-    $ #{oparser.program_name} -w "foo(\\d+)" 'bar(\#{$1})'
-  例4. 行末のスペースを削除するには？
-    $ #{oparser.program_name} "\\s+$" "\\n"
-  例5. func(1, 2) を func(2, 1) にするには？
+  例1. alice → bob (カレント以下のテキストファイルが対象)
+    $ #{oparser.program_name} alice bob
+  例2. alice → bob (単語として)
+    $ #{oparser.program_name} -w alice bob
+  例3. func1 → func(1)
+    $ #{oparser.program_name} -w "func(\\d+)" 'func(\#{$1})'
+  例5. func(1, 2) → func(2, 1) (引数の入れ替え)
     $ #{oparser.program_name} "func\\((.*?),(.*?)\\)" 'func(\#{$2},\#{$1})'
-  例6. シングルクォーテーションをダブルクォーテーションに変換
+  例4. 行末スペース削除
+    $ #{oparser.program_name} "\\s+$" "\\n"
+  例6. シングルクォーテーション → ダブルクォーテーション
     $ #{oparser.program_name} \"'\" \"\\\\\"\"
   例7. 半角カナも含めて全角カナにするには？
     $ #{oparser.program_name} --utf8 カナ かな
   例8. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
     $ #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
-  例9. test-unit → rspec への簡易変換
+  例9. test-unit から rspec への簡易変換
     $ #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
     $ #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
     $ #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
-  例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換するには？
+  例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
     $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
 EOT
       end

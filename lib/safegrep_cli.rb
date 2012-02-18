@@ -7,7 +7,7 @@ require "optparse"
 require_relative 'file_filter'
 
 module Safegrep
-  VERSION = '2.0.4'.freeze
+  VERSION = '2.0.3'.freeze
 
   class Core
     def self.run(*args)
@@ -16,10 +16,12 @@ module Safegrep
 
     def self.default_options
       {
-        :escape => false,
-        :toutf8 => false,
-        :word => false,
-        :all => false,
+        :escape   => false,
+        :toutf8   => false,
+        :word     => false,
+        :all      => false,
+        :ignocase => false,
+        :guess    => false,
       }
     end
 
@@ -145,15 +147,15 @@ module Safegrep
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
-          "文字列検索スクリプト #{oparser.ver}\n",
+          "文字列検索 #{oparser.ver}\n",
           "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>...\n",
         ].join
         oparser.on("オプション")
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない(初期値:#{options[:ignocase]})") {|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす(初期値:#{options[:word]})") {|v|options[:word] = v}
-        oparser.on("-s", "検索文字列をエスケープ(初期値:#{options[:escape]})") {|v|options[:escape] = v}
-        oparser.on("-a", "コメント行も含める(初期値:#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v|options[:word] = v}
+        oparser.on("-s", "検索文字列をエスケープ(#{options[:escape]})") {|v|options[:escape] = v}
+        oparser.on("-a", "コメント行も含める(#{options[:all]})"){|v|options[:all] = v}
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("-d", "--debug", "デバッグモード"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
       end

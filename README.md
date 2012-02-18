@@ -1,22 +1,81 @@
 コマンドライン用便利ツール集
 ============================
 
-ファイル整形ツール
-------------------
+テキストファイル置換
+--------------------
+
+    $ r --help
+    テキストファイル置換 r 2.0.4
+    使い方: r [オプション] <置換前> <置換後> <ファイル or ディレクトリ>...
+    オプション:
+        -x, --exec                       本当に置換する
+        -w, --word-regexp                単語とみなす(false)
+        -s, --simple                     置換前の文字列を普通のテキストと見なす(false)
+        -i, --ignore-case                大小文字を区別しない(false)
+        -u, --[no-]utf8                  半角カナを全角カナに統一して置換(false)
+    レアオプション:
+        -g, --guess                      文字コードをNKF.guessで判断する(false)
+            --[no-]sjis                  文字コードをすべてsjisとする(false)
+            --head=N                     先頭のn行のみが対象
+            --limit=N                    N個置換したら打ち切る
+        -d, --debug                      デバッグ用
+            --help                       このヘルプを表示する
+    実行例:
+      例1. alice → bob (カレント以下のテキストファイルが対象)
+        $ r alice bob
+      例2. alice → bob (単語として)
+        $ r -w alice bob
+      例3. func1 → func(1)
+        $ r -w "func(\d+)" 'func(#{$1})'
+      例5. func(1, 2) → func(2, 1) (引数の入れ替え)
+        $ r "func\((.*?),(.*?)\)" 'func(#{$2},#{$1})'
+      例4. 行末スペース削除
+        $ r "\s+$" "\n"
+      例6. シングルクォーテーション → ダブルクォーテーション
+        $ r "'" "\\""
+      例7. 半角カナも含めて全角カナにするには？
+        $ r --utf8 カナ かな
+      例8. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
+        $ r "\burl\(images/(\S+?)\)" 'url(<%= asset_path(\"themes/#{f.to_s.scan(/themes\/(\S+?)\//).flatten.first}/images/#{m[1]}\") %>)'
+      例9. test-unit から rspec への簡易変換
+        $ r "class Test(.*) < Test::Unit::TestCase" 'describe #{$1} do'
+        $ r "def test_(\S+)" 'it \"#{$1}\" do'
+        $ r "assert_equal\((.*?), (.*?)\)" '#{$2}.should == #{$1}'
+      例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
+        $ r "require File.expand_path\(File.join\(File.dirname\(__FILE__\), \"(.*)\"\)\)" "require_relative '#{\$1}'"
+
+文字列検索
+----------
+
+    $ g --help
+    文字列検索 g 2.0.3
+    使い方: g [オプション] <検索文字列> <ファイル or ディレクトリ>...
+    オプション
+        -i, --ignore-case                大小文字を区別しない(false)
+        -w, --word-regexp                単語とみなす(false)
+        -s                               検索文字列をエスケープ(false)
+        -a                               コメント行も含める(false)
+        -u, --[no-]utf8                  半角カナを全角カナに統一して置換(false)
+        -d, --debug                      デバッグモード
+            --help                       このヘルプを表示する
+
+
+ファイル整形
+------------
 
     $ safefile --help
-    ファイル整形ツール safefile 1.0.0
+    ファイル整形 safefile 1.0.0
     使い方: safefile [オプション] ディレクトリ or ファイル...
     オプション:
         -x, --exec                       本当に置換する
         -r, --recursive                  サブディレクトリも対象にする(デフォルト:false)
-        -s, --[no-]rstrip                rstripする(初期値:true)
-        -b, --[no-]delete-blank-lines    2行以上の空行を1行にする(初期値:true)
-        -z, --[no-]hankaku               「ａ-ｚＡ-Ｚ０-９（）／＊」を半角にする(初期値:true)
-        -Z, --[no-]hankaku-space         全角スペースを半角スペースにする(初期値:true)
-        -d, --[no-]diff                  diffの表示(初期値:false)
-        -u, --[no-]uniq                  同じ行が続く場合は一行にする(初期値:false)
-        -w, --windows                    SHIFT-JISで改行も CR + LF にする(初期値:false)
+        -s, --[no-]rstrip                rstripする(true)
+        -b, --[no-]delete-blank-lines    2行以上の空行を1行にする(true)
+        -z, --[no-]hankaku               「ａ-ｚＡ-Ｚ０-９（）／＊」を半角にする(true)
+        -Z, --[no-]hankaku-space         全角スペースを半角スペースにする(true)
+        -d, --[no-]diff                  diffの表示(false)
+        -u, --[no-]uniq                  同じ行が続く場合は一行にする(false)
+        -w, --windows                    SHIFT-JISで改行も CR + LF にする(false)
         -f, --force                      強制置換する
     使用例:
         1. カレントディレクトリのすべてのファイルを整形する

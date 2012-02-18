@@ -172,21 +172,21 @@ module Safefile
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
-          "ファイル整形ツール #{oparser.ver}\n",
+          "ファイル整形 #{oparser.ver}\n",
           "使い方: #{oparser.program_name} [オプション] ディレクトリ or ファイル...\n",
         ].join
         oparser.on("オプション:")
         oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
         oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})"){|v|options[:recursive] = v}
-        oparser.on("-s", "--[no-]rstrip", "rstripする(初期値:#{options[:rstrip]})"){|v|options[:rstrip] = v}
-        oparser.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(初期値:#{options[:delete_blank_lines]})"){|v|options[:delete_blank_lines] = v}
-        oparser.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(初期値:#{options[:hankaku]})"){|v|options[:hankaku] = v}
-        oparser.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(初期値:#{options[:hankaku_space]})"){|v|options[:hankaku_space] = v}
-        oparser.on("-d", "--[no-]diff", "diffの表示(初期値:#{options[:diff]})"){|v|options[:diff] = v}
-        oparser.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(初期値:#{options[:uniq]})"){|v|options[:uniq] = v}
-        oparser.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(初期値:#{options[:windows]})"){|v|options[:windows] = v}
+        oparser.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})"){|v|options[:rstrip] = v}
+        oparser.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})"){|v|options[:delete_blank_lines] = v}
+        oparser.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})"){|v|options[:hankaku] = v}
+        oparser.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})"){|v|options[:hankaku_space] = v}
+        oparser.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})"){|v|options[:diff] = v}
+        oparser.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})"){|v|options[:uniq] = v}
+        oparser.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})"){|v|options[:windows] = v}
         oparser.on("-f", "--force", "強制置換する"){|v|options[:force] = v}
-        # oparser.on("-q", "--quiet", "静かにする(初期値:#{options[:quiet]})"){|v|options[:quiet] = v}
+        # oparser.on("-q", "--quiet", "静かにする(#{options[:quiet]})"){|v|options[:quiet] = v}
         oparser.on(<<-EOT)
 使用例:
     1. カレントディレクトリのすべてのファイルを整形する

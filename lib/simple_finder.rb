@@ -97,7 +97,7 @@ module SimpleFinder
 
       oparser = OptionParser.new do |oparser|
         oparser.banner = [
-          "関連ファイル検索スクリプト Version 2.0.0\n\n",
+          "関連ファイル検索 Version 2.0.0\n\n",
           "使い方: #{Pathname.new($0).basename} [オプション] 検索元 ファイル...\n\n",
         ].join
         oparser.on_head("オプション")
