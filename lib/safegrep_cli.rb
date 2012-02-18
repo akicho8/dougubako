@@ -4,31 +4,156 @@
 #
 
 require "optparse"
-require_relative "safegrep_core"
+require_relative 'file_filter'
 
 module Safegrep
-  VERSION = "2.0.2".freeze
+  VERSION = '2.0.4'.freeze
+
+  class Core
+    def self.run(*args)
+      new(*args).run
+    end
+
+    def self.default_options
+      {
+        :escape => false,
+        :toutf8 => false,
+        :word => false,
+        :all => false,
+      }
+    end
+
+    def initialize(source_string, target_files, options = {})
+      @source_string = source_string
+      @target_files = target_files
+
+      @options = self.class.default_options.merge(options)
+
+      if @options[:toutf8]
+        @source_string = @source_string.toutf8
+      end
+
+      @log = []
+      @error_logs = []
+      @counts = Hash.new(0)
+
+      if @options[:escape]
+        @source_string = Regexp.quote(@source_string)
+      end
+
+      if @options[:word]
+        @source_string = "\\b#{@source_string}\\b"
+      end
+
+      option = 0
+      if @options[:ignocase]
+        option |= Regexp::IGNORECASE
+      end
+      @source_string = Regexp.compile(@source_string, option)
+
+      puts "検索言:【#{@source_string.source}】(大小文字を区別#{@source_string.casefold? ? "しない" : "する"})"
+    end
+
+    def run
+      @target_files.each do |target_file|
+        Pathname(target_file).find do |filename|
+          if FileFilter.ignore_file?(filename)
+            if @options[:debug]
+              puts "skip: #{filename}"
+            end
+            next
+          end
+          grep_execute(filename)
+        end
+      end
+      result_display
+    end
+
+    private
+
+    def grep_execute(filename)
+      if @options[:debug]
+        puts "process: #{filename}"
+      end
+      filename = filename.expand_path
+      count = 0
+      begin
+        buffer = filename.read
+      rescue Errno::EISDIR => error
+        STDERR.puts "警告: #{error}"
+      else
+        if @options[:toutf8]
+          buffer = buffer.toutf8
+        end
+        buffer.lines.each_with_index do |line, index|
+          begin
+            if comment_skip?(filename, line)
+              next
+            end
+            line = line.clone
+            if line.gsub!(@source_string){
+                count += 1
+                "【#{$&}】"
+              }
+              puts "#{filename}(#{index.succ}): #{line.strip}"
+            end
+          rescue ArgumentError => error
+            @error_logs << "【読み込み失敗】: #{filename} (#{error})"
+            break
+          end
+        end
+      end
+      if count.nonzero?
+        @log << {:filename => filename, :count => count}
+      end
+      @counts[:total] += count
+    end
+
+    def comment_skip?(filename, line)
+      if @options[:all]
+        return false
+      end
+      if filename.extname.match(/\b(css|scss)\b/)
+        return false
+      end
+      if line.match(/^\s*#/)
+        return true
+      end
+      false
+    end
+
+    def result_display
+      unless @log.empty?
+        puts
+        puts @log.sort_by{|a|a[:count]}.collect{|e|"#{e[:filename]} (#{e[:count]} hit)"}
+      end
+      unless @error_logs.empty?
+        puts
+        puts @error_logs.join("\n")
+      end
+      puts
+      puts "結果: #{@log.size} 個のファイルを対象に #{@counts[:total]} 個所を検索しました。"
+    end
+  end
 
   module CLI
-    def self.execute(args)
-      options = {
-        :no_comment_skip => false,
-        :debug => false,
-        :toutf8 => false,
-      }
+    extend self
+
+    def execute(args)
+      options = Core.default_options
 
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
           "文字列検索スクリプト #{oparser.ver}\n",
-          "使い方: #{oparser.program_name} [オプション] 検索元 ファイル...\n",
+          "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>...\n",
         ].join
-        oparser.on("オプション:")
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
-        oparser.on("-s", "検索文字列をエスケープ") {|v|options[:escape] = v}
-        oparser.on("-a", "#で始まる行をスキップしない"){|v|options[:no_comment_skip] = v}
-        oparser.on("-u", "--[no-]utf8", "内部でtoutf8した結果に対して検索する(旧デフォルト。ハンカクカナを全角カナとみなす。初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
+        oparser.on("オプション")
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない(初期値:#{options[:ignocase]})") {|v|options[:ignocase] = v}
+        oparser.on("-w", "--word-regexp", "単語とみなす(初期値:#{options[:word]})") {|v|options[:word] = v}
+        oparser.on("-s", "検索文字列をエスケープ(初期値:#{options[:escape]})") {|v|options[:escape] = v}
+        oparser.on("-a", "コメント行も含める(初期値:#{options[:all]})"){|v|options[:all] = v}
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(初期値:#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("-d", "--debug", "デバッグモード"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
       end
@@ -36,14 +161,12 @@ module Safegrep
       begin
         oparser.parse!(args)
       rescue OptionParser::InvalidOption
-        puts "オプションが間違っています"
-        abort
+        puts error
+        usage(oparser)
       end
 
       if args.empty?
-        puts "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>..."
-        puts "`#{oparser.program_name}' --help でより詳しい情報を表示します。"
-        abort
+        usage(oparser)
       end
 
       src = args.shift
@@ -53,6 +176,12 @@ module Safegrep
       end
 
       Safegrep::Core.run(src, args, options)
+    end
+
+    def usage(oparser)
+      puts "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>..."
+      puts "`#{oparser.program_name}' --help でより詳しい情報を表示します。"
+      abort
     end
   end
 end

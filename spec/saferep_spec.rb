@@ -36,11 +36,12 @@ describe do
     it "両方エスケープされる" do
       `#{LIB_ROOT}/bin/saferep -s  '($var)' 'x\#{$1}x' testdir`.include?('【ax#{$1}xax#{$1}xa】').should == true
     end
-    it "置換元だけがエスケープされる" do
-      `#{LIB_ROOT}/bin/saferep -s1 '($var)' 'x\#{$1}x' testdir`.include?("【axxaxxa】").should == true
-    end
-    it "置換後だけがエスケープされる" do
-      `#{LIB_ROOT}/bin/saferep -s2 '(\\$var)' 'x\#{$1}x' testdir`.include?("【a(x\#{$1}x)a(x\#{$1}x)a】").should == true
-    end
+    # # 旧仕様
+    # it "置換元だけがエスケープされる" do
+    #   `#{LIB_ROOT}/bin/saferep -s1 '($var)' 'x\#{$1}x' testdir`.include?("【axxaxxa】").should == true
+    # end
+    # it "置換後だけがエスケープされる" do
+    #   `#{LIB_ROOT}/bin/saferep -s2 '(\\$var)' 'x\#{$1}x' testdir`.include?("【a(x\#{$1}x)a(x\#{$1}x)a】").should == true
+    # end
   end
 end
