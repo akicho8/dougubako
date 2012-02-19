@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ファイルを連番にリネームするスクリプト
+# ファイル名リナンバー
 #
 
 require 'optparse'
@@ -9,7 +9,7 @@ require 'fileutils'
 require_relative 'file_filter'
 
 module Saferenum
-  VERSION = "1.1.0"
+  VERSION = "1.1.1".freeze
 
   class Core
     attr_reader :options
@@ -159,7 +159,7 @@ module Saferenum
       oparser = OptionParser.new do |oparser|
         oparser.version = VERSION
         oparser.banner = [
-          "ファイルを連番にリネームするスクリプト #{oparser.ver}\n",
+          "ファイル名リナンバー #{oparser.ver}\n",
           "使い方: #{oparser.program_name} [オプション] 対象ディレクトリ...\n",
         ].join
         oparser.on_head("オプション:")
@@ -167,9 +167,9 @@ module Saferenum
         oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})"){|v|options[:recursive] = v}
         oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})"){|v|options[:all] = v}
         oparser.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})"){|v|options[:reject_basename] = v}
-        oparser.on("--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer){|v|options[:base] = v}
-        oparser.on("--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer){|v|options[:step] = v}
-        oparser.on("--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer){|v|options[:zero] = v}
+        oparser.on("-b", "--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer){|v|options[:base] = v}
+        oparser.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer){|v|options[:step] = v}
+        oparser.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer){|v|options[:zero] = v}
         oparser.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass){|v|options[:number_only] = v}
         oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})"){|v|options[:verbose] = v}
         oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
