@@ -20,6 +20,8 @@ module Saferep
         :timeout  => 1.0,
         :ignocase => false,
         :simple   => false,
+        :simple_a => false,
+        :simple_b => false,
         :word     => false,
         :toutf8   => false,
         :tosjis   => false,
@@ -41,6 +43,11 @@ module Saferep
       @stop = false
 
       if @options[:simple]
+        @options[:simple_a] = true
+        @options[:simple_b] = true
+      end
+
+      if @options[:simple_a]
         @src = Regexp.quote(@src)
       end
 
@@ -134,7 +141,7 @@ module Saferep
             if new_line.gsub!(@srcreg){
                 m = match = __MATCH__ = Regexp.last_match
                 count += 1
-                if @options[:simple]
+                if @options[:simple_b]
                   @dst
                 else
                   eval(%("#{@dst}"), binding)
@@ -222,7 +229,9 @@ module Saferep
         oparser.on("オプション:")
         oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
         oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})"){|v|options[:word] = v}
-        oparser.on("-s", "--simple", "置換前の文字列を普通のテキストと見なす(#{options[:simple]})"){|v|options[:simple] = v}
+        oparser.on("-s", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})"){|v|options[:simple] = v}
+        oparser.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})"){|v|options[:simple_a] = v}
+        oparser.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})"){|v|options[:simple_b] = v}
         oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})"){|v|options[:ignocase] = v}
         oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("レアオプション:")

@@ -36,16 +36,15 @@ describe do
     `#{LIB_ROOT}/bin/saferep '_(\\w+)_' '@\#{\$1}@' testdir`.lines.grep(/→【foo @foo@ FOO】/).size.should == 1
   end
 
-  context "option_s" do
+  context "エスケープの有無" do
     it "両方エスケープされる" do
       `#{LIB_ROOT}/bin/saferep -s  '($var)' 'x\#{$1}x' testdir`.include?('【ax#{$1}xax#{$1}xa】').should == true
     end
-    # # 旧仕様
-    # it "置換元だけがエスケープされる" do
-    #   `#{LIB_ROOT}/bin/saferep -s1 '($var)' 'x\#{$1}x' testdir`.include?("【axxaxxa】").should == true
-    # end
-    # it "置換後だけがエスケープされる" do
-    #   `#{LIB_ROOT}/bin/saferep -s2 '(\\$var)' 'x\#{$1}x' testdir`.include?("【a(x\#{$1}x)a(x\#{$1}x)a】").should == true
-    # end
+    it "置換元だけがエスケープされる" do
+      `#{LIB_ROOT}/bin/saferep -A '($var)' 'x\#{$1}x' testdir`.include?("【axxaxxa】").should == true
+    end
+    it "置換後だけがエスケープされる" do
+      `#{LIB_ROOT}/bin/saferep -B '(\\$var)' 'x\#{$1}x' testdir`.include?("【a(x\#{$1}x)a(x\#{$1}x)a】").should == true
+    end
   end
 end

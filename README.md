@@ -11,6 +11,8 @@
         -x, --exec                       本当に置換する
         -w, --word-regexp                単語とみなす(false)
         -s, --simple                     置換前の文字列を普通のテキストと見なす(false)
+        -A                               置換前の文字列のみ普通のテキストと見なす(false)
+        -B                               置換後の文字列のみ普通のテキストと見なす(false)
         -i, --ignore-case                大小文字を区別しない(false)
         -u, --[no-]utf8                  半角カナを全角カナに統一して置換(false)
     レアオプション:
