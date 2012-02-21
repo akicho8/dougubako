@@ -158,7 +158,7 @@ module Safegrep
         oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v|options[:word] = v}
         oparser.on("-s", "検索文字列をエスケープ(#{options[:escape]})") {|v|options[:escape] = v}
         oparser.on("-a", "コメント行も含める(#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})"){|v|options[:toutf8] = v}
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})"){|v|options[:toutf8] = v}
         oparser.on("-d", "--debug", "デバッグモード"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
       end

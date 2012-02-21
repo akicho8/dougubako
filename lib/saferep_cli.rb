@@ -29,11 +29,11 @@ module Saferep
       }
     end
 
-    def initialize(src, dst, files, options)
+    def initialize(src, dest, files, options)
       @options = self.class.default_options.merge(options)
 
       @src = src
-      @dst = dst
+      @dest = dest
       @files = files
 
       @log = []
@@ -60,8 +60,8 @@ module Saferep
         @src = "\\b#{@src}\\b"
       end
 
-      @srcreg = Regexp.compile(@src, option)
-      puts "置換情報:【#{@srcreg.source}】=>【#{@dst}】(大小文字を区別#{@srcreg.casefold? ? "しない" : "する"})"
+      @src_regexp = Regexp.compile(@src, option)
+      puts "置換情報:【#{@src_regexp.source}】=>【#{@dest}】(大小文字を区別#{@src_regexp.casefold? ? "しない" : "する"})"
 
       if @options[:active_support]
         require "active_support/core_ext/string"
@@ -114,37 +114,34 @@ module Saferep
       f = __TARGET_FILE__ = fname
       count = 0
       out = []
-      content = fname.read
+      body = fname.read
       guess = nil
 
       if @options[:toutf8]
-        content = content.toutf8
+        body = body.toutf8
         if @options[:tosjis]
           guess = NKF::SJIS
         else
           if @options[:guess]
-            guess = NKF.guess(content)
+            guess = NKF.guess(body)
           else
             guess = NKF::UTF8
           end
         end
       end
 
-      content.lines.each_with_index{|line, index|
+      body.lines.each_with_index{|line, index|
         new_line = line.clone
-        do_gsub = true
         if @options[:head] && index.next > @options[:head]
-          do_gsub = false
-        end
-        if do_gsub
+        else
           begin
-            if new_line.gsub!(@srcreg){
+            if new_line.gsub!(@src_regexp) {
                 m = match = __MATCH__ = Regexp.last_match
                 count += 1
                 if @options[:simple_b]
-                  @dst
+                  @dest
                 else
-                  eval(%("#{@dst}"), binding)
+                  eval(%("#{@dest}"), binding)
                 end
               }
               puts "#{fname}(#{index.succ}):【#{line.strip}】→【#{new_line.strip}】"
@@ -170,7 +167,7 @@ module Saferep
           if bak.exist?
             out = out.join
             if guess
-              out = out.join.kconv(guess, NKF::UTF8)
+              out = out.kconv(guess, NKF::UTF8)
             end
             fname.open("w"){|f|f << out}
             fname.chmod(bak.stat.mode)
@@ -244,7 +241,7 @@ module Saferep
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 実行例:
-  例1. alice → bob (カレント以下のテキストファイルが対象)
+  例1. alice → bob
     $ #{oparser.program_name} alice bob
   例2. alice → bob (単語として)
     $ #{oparser.program_name} -w alice bob
@@ -279,8 +276,8 @@ EOT
       end
 
       src = args.shift
-      dst = args.shift
-      if src.nil? || dst.nil?
+      dest = args.shift
+      if src.nil? || dest.nil?
         usage(oparser)
       end
 
@@ -288,7 +285,7 @@ EOT
         args << "."
       end
 
-      Saferep::Core.run(src, dst, args, options)
+      Saferep::Core.run(src, dest, args, options)
     end
 
     def usage(oparser)

@@ -24,9 +24,9 @@ module SimpleFinder
       if options[:word]
         src = "[\\b_]#{src}[\\b_]"
       end
-      @srcreg = Regexp.compile(src, regexp_option)
+      @src_regexp = Regexp.compile(src, regexp_option)
       unless @options[:quiet]
-        puts "検索情報:【#{@srcreg.source}】(大小文字を区別#{@srcreg.casefold? ? "しない" : "する"})"
+        puts "検索情報:【#{@src_regexp.source}】(大小文字を区別#{@src_regexp.casefold? ? "しない" : "する"})"
       end
       @count = 0
     end
@@ -45,7 +45,7 @@ module SimpleFinder
     end
 
     def execute(basepath, fname)
-      if @srcreg.source.include?("/") || @options[:fullpath]
+      if @src_regexp.source.include?("/") || @options[:fullpath]
         # 検索ワードに / が含まれていたらベースネームではなくパスと比較するためそのままにする
         target = fname
       else
@@ -55,7 +55,7 @@ module SimpleFinder
           target = fname.basename
         end
       end
-      if md = @srcreg.match(target.to_s)
+      if md = @src_regexp.match(target.to_s)
         file_utils_options = {:noop => !@options[:exec], :verbose => true}
         if @options[:copy_to]
           if @options[:rename_from] && @options[:rename_to]

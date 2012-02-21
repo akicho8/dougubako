@@ -5,7 +5,7 @@
 --------------------
 
     $ r --help
-    テキストファイル置換 r 2.0.4
+    テキストファイル置換 r 2.0.5
     使い方: r [オプション] <置換前> <置換後> <ファイル or ディレクトリ>...
     オプション:
         -x, --exec                       本当に置換する
@@ -23,7 +23,7 @@
         -d, --debug                      デバッグ用
             --help                       このヘルプを表示する
     実行例:
-      例1. alice → bob (カレント以下のテキストファイルが対象)
+      例1. alice → bob
         $ r alice bob
       例2. alice → bob (単語として)
         $ r -w alice bob
@@ -31,19 +31,21 @@
         $ r -w "func(\d+)" 'func(#{$1})'
       例5. func(1, 2) → func(2, 1) (引数の入れ替え)
         $ r "func\((.*?),(.*?)\)" 'func(#{$2},#{$1})'
-      例4. 行末スペース削除
+      例6. func(FooBar) → func(:foo_bar) (引数の定数をアンダースコア表記のシンボルに変換)
+        $ r --activesupport "func\((\w+)\)" "func(:#{\$1.underscore})"
+      例7. 行末スペース削除
         $ r "\s+$" "\n"
-      例6. シングルクォーテーション → ダブルクォーテーション
+      例8. シングルクォーテーション → ダブルクォーテーション
         $ r "'" "\\""
-      例7. 半角カナも含めて全角カナにするには？
+      例9. 半角カナも含めて全角カナにするには？
         $ r --utf8 カナ かな
-      例8. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
+      例10. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
         $ r "\burl\(images/(\S+?)\)" 'url(<%= asset_path(\"themes/#{f.to_s.scan(/themes\/(\S+?)\//).flatten.first}/images/#{m[1]}\") %>)'
-      例9. test-unit から rspec への簡易変換
+      例11. test-unit から rspec への簡易変換
         $ r "class Test(.*) < Test::Unit::TestCase" 'describe #{$1} do'
         $ r "def test_(\S+)" 'it \"#{$1}\" do'
         $ r "assert_equal\((.*?), (.*?)\)" '#{$2}.should == #{$1}'
-      例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
+      例12. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
         $ r "require File.expand_path\(File.join\(File.dirname\(__FILE__\), \"(.*)\"\)\)" "require_relative '#{\$1}'"
 
 文字列検索
@@ -57,7 +59,7 @@
         -w, --word-regexp                単語とみなす(false)
         -s                               検索文字列をエスケープ(false)
         -a                               コメント行も含める(false)
-        -u, --[no-]utf8                  半角カナを全角カナに統一して置換(false)
+        -u, --[no-]utf8                  半角カナを全角カナに統一(false)
         -d, --debug                      デバッグモード
             --help                       このヘルプを表示する
 
