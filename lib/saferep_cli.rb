@@ -8,7 +8,7 @@ require "timeout"
 require_relative 'file_filter'
 
 module Saferep
-  VERSION = "2.0.4".freeze
+  VERSION = "2.0.5".freeze
 
   class Core
     def self.run(*args)
@@ -55,6 +55,10 @@ module Saferep
 
       @srcreg = Regexp.compile(@src, option)
       puts "置換情報:【#{@srcreg.source}】=>【#{@dst}】(大小文字を区別#{@srcreg.casefold? ? "しない" : "する"})"
+
+      if @options[:active_support]
+        require "active_support/core_ext/string"
+      end
     end
 
     def run
@@ -226,6 +230,7 @@ module Saferep
         oparser.on("--[no-]sjis", "文字コードをすべてsjisとする(#{options[:tosjis]})"){|v|options[:tosjis] = v}
         oparser.on("--head=N", "先頭のn行のみが対象", Integer){|v|options[:head] = v}
         oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
+        oparser.on("--activesupport", "active_support/core_ext/string.rb を読み込む"){|v|options[:active_support] = v}
         oparser.on("-d", "--debug", "デバッグ用"){|v|options[:debug] = v}
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
@@ -238,19 +243,21 @@ module Saferep
     $ #{oparser.program_name} -w "func(\\d+)" 'func(\#{$1})'
   例5. func(1, 2) → func(2, 1) (引数の入れ替え)
     $ #{oparser.program_name} "func\\((.*?),(.*?)\\)" 'func(\#{$2},\#{$1})'
-  例4. 行末スペース削除
+  例6. func(FooBar) → func(:foo_bar) (引数の定数をアンダースコア表記のシンボルに変換)
+    $ #{oparser.program_name} --activesupport "func\\((\\w+)\\)" "func(:\#{\\$1.underscore})"
+  例7. 行末スペース削除
     $ #{oparser.program_name} "\\s+$" "\\n"
-  例6. シングルクォーテーション → ダブルクォーテーション
+  例8. シングルクォーテーション → ダブルクォーテーション
     $ #{oparser.program_name} \"'\" \"\\\\\"\"
-  例7. 半角カナも含めて全角カナにするには？
+  例9. 半角カナも含めて全角カナにするには？
     $ #{oparser.program_name} --utf8 カナ かな
-  例8. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
+  例10. jQuery UIのテーマのCSSの中の url(images/xxx.png) を url(<%= asset_path("themes/(テーマ名)/images/xxx.png") %>) に置換するには？
     $ #{oparser.program_name} "\\burl\\(images/(\\S+?)\\)" 'url(<%= asset_path(\\"themes/\#{f.to_s.scan(/themes\\/(\\S+?)\\//).flatten.first}/images/\#{m[1]}\\") %>)'
-  例9. test-unit から rspec への簡易変換
+  例11. test-unit から rspec への簡易変換
     $ #{oparser.program_name} \"class Test(.*) < Test::Unit::TestCase\" 'describe \#{$1} do'
     $ #{oparser.program_name} \"def test_(\\S+)\" 'it \\\"\#{$1}\\\" do'
     $ #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
-  例10. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
+  例12. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
     $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
 EOT
       end

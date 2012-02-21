@@ -28,6 +28,10 @@ describe do
     File.stat("testdir/a.txt").mode.should == 0100777 # パーミッションが変化していないか?
   end
 
+  it "--activesupport オプションを使うと camelize 等が使える" do
+    `#{LIB_ROOT}/bin/saferep --activesupport "(_f.o_)" "\#{\\$1.camelize}" testdir`.lines.grep(/→【foo Foo FOO】/).size.should == 1
+  end
+
   it "block_replace" do
     `#{LIB_ROOT}/bin/saferep '_(\\w+)_' '@\#{\$1}@' testdir`.lines.grep(/→【foo @foo@ FOO】/).size.should == 1
   end
