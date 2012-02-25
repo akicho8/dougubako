@@ -75,7 +75,7 @@ module Safefile
         ret_code = "\n"
       end
 
-      source = filename.read.send(medhod)
+      source = filename.read.public_send(medhod)
       lines = source.split(/\r\n|\r|\n/).collect do |line|
         if @options[:hankaku_space]
           line = line.gsub(/#{[0x3000].pack('U')}/, " ")
