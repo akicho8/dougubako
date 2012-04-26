@@ -41,7 +41,7 @@ module TextJoin
     # ファイルやディレクトリの登録
     def all_files
       target_dirs.each do |target_dir|
-        target_dir.find do |filename|
+        Pathname.glob("#{target_dir}/**/*") do |filename|
           if FileFilter.ignore_file?(filename)
             @filter_files << filename
             next

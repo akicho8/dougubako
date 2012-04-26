@@ -265,6 +265,8 @@ module Saferep
     $ #{oparser.program_name} \"assert_equal\\((.*?), (.*?)\\)\" '\#{$2}.should == \#{$1}'
   例12. 1.8形式の require_relative 相当を 1.9 の require_relative に変換
     $ #{oparser.program_name} \"require File.expand_path\\(File.join\\(File.dirname\\(__FILE__\\), \\\"(.*)\\\"\\)\\)\" \"require_relative '\#{\\$1}'\"
+  例13. ハッシュを :foo => 1 形式から foo: 1 形式に変換
+    $ #{oparser.program_name} \":(\\S+)\\s*=>\\s*\" '\#{$1}: '
 EOT
       end
 
