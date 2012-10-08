@@ -15,6 +15,7 @@ class Application
     end
     puts "【検索文字列】"
     puts @regexp
+    puts
 
     process_ids = ps_aux
     if process_ids.empty?
@@ -22,20 +23,25 @@ class Application
     end
 
     command = "sudo kill -9 #{process_ids.join(' ')}"
+    puts
     puts "【実行コマンド】"
     puts command
     if exec_flag
       `#{command}`.display
       puts "実行しました。"
+
+      puts
       puts "----【実行後のプロセス確認】----"
+      puts
       ps_aux
     else
+      puts
       puts "本当に実行するには -x オプションをつけてください。"
     end
   end
 
   def ps_aux
-    lines = `ps aux`.find_all{|line|line.match(/#{@regexp}/)}
+    lines = `ps aux`.lines.find_all{|line|line.match(/#{@regexp}/)}
 
     # 自分のプロセスを除去
     lines.reject!{|line|line.match(/^\w+\s+#{Process.pid}\b/)}
@@ -50,6 +56,7 @@ class Application
       puts line
     }
 
+    puts
     puts "【対象のプロセスID】"
     process_ids = lines.map{|line|line.match(/^\S+\s+(\d+)/).captures.first.to_i}.sort.reverse
 
