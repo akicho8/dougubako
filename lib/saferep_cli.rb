@@ -8,7 +8,7 @@ require "timeout"
 require_relative 'file_filter'
 
 module Saferep
-  VERSION = "2.0.5".freeze
+  VERSION = "2.0.6".freeze
 
   class Core
     def self.run(*args)
@@ -26,6 +26,7 @@ module Saferep
         :toutf8   => false,
         :tosjis   => false,
         :guess    => false,
+        :all      => false,
       }
     end
 
@@ -72,6 +73,7 @@ module Saferep
       catch(:exit) do
         @files.each do |filepath|
           Pathname(filepath).find do |fname|
+            next if fname.directory?
             @counts[:fetch] += 1
             if @options[:debug]
               puts "find: #{fname.expand_path}"
@@ -104,6 +106,7 @@ module Saferep
     private
 
     def ignore_file?(fname)
+      return false if @options[:all]
       resp = nil
       resp ||= FileFilter.ignore_file?(fname)
       resp ||= fname.basename.to_s.match(/(ChangeLog|\.diff)$/i)
@@ -227,6 +230,7 @@ module Saferep
         oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
         oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})"){|v|options[:word] = v}
         oparser.on("-s", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})"){|v|options[:simple] = v}
+        oparser.on("-a", "--all", "フィルタせずにすべてのファイルを対象にする(#{options[:all]})"){|v|options[:all] = v}
         oparser.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})"){|v|options[:simple_a] = v}
         oparser.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})"){|v|options[:simple_b] = v}
         oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})"){|v|options[:ignocase] = v}
