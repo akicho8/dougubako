@@ -4,7 +4,7 @@
 #
 
 require "pathname"
-require "optparse" 
+require "optparse"
 require "diff/lcs"
 
 require_relative 'file_filter'
@@ -195,6 +195,8 @@ module Safefile
       $ #{oparser.program_name} -rd .
     3. カレントの *.bat のファイルをWindows用に置換する
       $ #{oparser.program_name} -w *.bat
+    4. UTF-8にするだけ
+      $ #{oparser.program_name} --no-rstrip --no-delete-blank-lines --no-hankaku --no-hankaku-space --no-uniq *.kif
 EOT
       end
 

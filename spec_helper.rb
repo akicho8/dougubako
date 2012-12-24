@@ -1,6 +1,5 @@
 require "fileutils"
 require "pathname"
-require "tapp"
 
 LIB_ROOT = Pathname(__FILE__).dirname
 
