@@ -8,7 +8,7 @@ require "timeout"
 require_relative 'file_filter'
 
 module Saferep
-  VERSION = "2.0.6".freeze
+  VERSION = "2.0.7".freeze
 
   class Core
     def self.run(*args)
@@ -229,7 +229,7 @@ module Saferep
         oparser.on("オプション:")
         oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
         oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})"){|v|options[:word] = v}
-        oparser.on("-s", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})"){|v|options[:simple] = v}
+        oparser.on("-s", "-Q", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})"){|v|options[:simple] = v}
         oparser.on("-a", "--all", "フィルタせずにすべてのファイルを対象にする(#{options[:all]})"){|v|options[:all] = v}
         oparser.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})"){|v|options[:simple_a] = v}
         oparser.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})"){|v|options[:simple_b] = v}
