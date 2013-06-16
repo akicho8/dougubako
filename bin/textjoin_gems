@@ -14,7 +14,8 @@ module TextJoin
       if false
         gem_path = "/opt/local/lib/ruby/gems/1.8"
       else
-        gem_path = `rvm gemdir`.strip
+        # gem_path = `rvm gemdir`.strip
+        gem_path = "/usr/local/var/rbenv/versions/1.9.3-p392/lib/ruby/gems/1.9.1"
       end
       Pathname.glob("#{gem_path}/gems/*").each{|path|
         all_gems << path
