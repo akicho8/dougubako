@@ -37,13 +37,15 @@ module FileFilter
       /\b(cache|password_dic|coverage|public\/assets)\b/,
       /\b(doc\/app|coverage|pkg|ruby_sess|yardoc)\b/,
       /tmp.*meta_request.*json\z/, # rails tmp/data/meta_request/91f33f2a0bbf97d42fc1b1c95915fc91.json
+      /\b(cache|password_dic|coverage|public\/assets)\b/,
+      /\.bundle\b/,
       # ゴミ
       "~", "#", "%", "$",
       # その他
       /\b(min)\b.*\.(js|css)\z/,
       /(stylesheets|javascripts|assets)\/_+cache/,
     ]
-    if filepath.to_s.match(Regexp.union(*list))
+    if filepath.to_s.match(@file_filter_regexp ||= Regexp.union(*list))
       return true
     end
 
