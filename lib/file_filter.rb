@@ -44,7 +44,11 @@ module FileFilter
       # その他
       /\b(min)\b.*\.(js|css)\z/,
       /(stylesheets|javascripts|assets)\/_+cache/,
+
+      # 例外的に
+      /テキストファイル|版元さんからの画像/,
     ]
+
     if filepath.to_s.match(@file_filter_regexp ||= Regexp.union(*list))
       return true
     end
