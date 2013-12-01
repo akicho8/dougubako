@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+#
+# テキストで画像表示
+#
+# ターミナルに画像を表示する
+# http://qiita.com/woxtu/items/f049bf5f89003fb52fdd
+#
+# ANSI escape code - Wikipedia, the free encyclopedia
+# http://en.wikipedia.org/wiki/ANSI_escape_code
+
+require "curses"
+require "rmagick"
+require "pathname"
+
+Curses.init_screen
+columns = Curses.cols / 2
+lines = Curses.lines - 1
+Curses.close_screen
+
+ARGV.each do |filename|
+  Pathname.glob(Pathname(filename).expand_path).sort.each do |filename|
+    image = Magick::Image.read(filename).first
+    image = image.normalize.resize_to_fit(columns, lines)
+    space = "  "
+    str = image.rows.times.collect do |row|
+      image.get_pixels(0, row, image.columns, 1).collect do |pixel|
+        rgb = [:red, :green, :blue].inject({}){|h, key|h.merge(key => pixel.send(key) * 6 / 65536)}
+        v = 16 + rgb[:red] * 36 + rgb[:green] * 6 + rgb[:blue]
+        "\x1b[48;5;#{v}m#{space}\x1b[0m"
+      end.join
+    end.join("\n")
+    Curses.clear
+    puts str
+    STDIN.gets
+  end
+end
