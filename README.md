@@ -129,9 +129,9 @@
 ファイル名リナンバー
 --------------------------------------
 
-    $ n --help
-    ファイル名リナンバー n 1.1.0
-    使い方: n [オプション] 対象ディレクトリ...
+    $ renum --help
+    ファイル名リナンバー renum 1.1.0
+    使い方: renum [オプション] 対象ディレクトリ...
     オプション:
         -x, --exec                       実際に実行する(デフォルト:false)
         -r, --recursive                  サブディレクトリも対象にする(デフォルト:false)
@@ -145,13 +145,13 @@
         -h, --help                       このヘルプを表示する
     サンプル:
         例1. カレントディレクトリの《番号_名前.拡張子》形式のファイルを同じ形式でリナンバーする
-            % n .
+            % renum .
         例2. 指定ディレクトリ以下のすべてのファイルを《番号.拡張子》形式にリネームする
-            % n -rac ~/Pictures/Archives
+            % renum -rac ~/Pictures/Archives
 
 ## BASIC の RENUM コマンドのようにファイル名をリナンバーする例
 
-    ~/.emacs.d $ n .
+    ~/.emacs.d $ renum .
     [DIR] /Users/alice/.emacs.d (101 files)
       U [  8/101] 00161_rubikichi.el => 00170_rubikichi.el
       U [  9/101] 00165_etc.el => 00180_etc.el
@@ -162,7 +162,7 @@
 
     ※上記の結果から問題がなければ -x オプションをつけて本当に実行する
 
-    ~/.emacs.d $ n . -x
+    ~/.emacs.d $ renum . -x
     [DIR] /Users/alice/.emacs.d (101 files)
       U [  8/101] 00161_rubikichi.el => 00170_rubikichi.el
       U [  9/101] 00165_etc.el => 00180_etc.el
@@ -174,7 +174,7 @@
 
     ※ --all ですべてのファイルを対象にして --reject-basename で元のファイル名をカットする
 
-    $ n --recursive --all --reject-basename ~/Pictures
+    $ renum --recursive --all --reject-basename ~/Pictures
     [DIR] /Users/alice/Pictures/Archives/深海魚 (20 files)
       U [ 1/20] a.jpg => 0100.jpg
       U [ 2/20] b.jpg => 0110.jpg
@@ -189,7 +189,7 @@
     --base から --step ごとにインクリメント
     --number-only で 0 のプレフィクスをつけない
 
-    $ n --recursive --all --number-only --base=1 --step=1 images
+    $ renum --recursive --all --number-only --base=1 --step=1 images
     [DIR] images/a (20 files)
       U [ 1/20] a.jpg => 1.jpg
       U [ 2/20] c.jpg => 2.jpg
@@ -201,7 +201,7 @@
 
 ## cronに仕掛けておくことで画像ディレクトリを自動整理
 
-    0 6 * * * n -racx ~/Pictures/Archives | nkf -j
+    0 6 * * * renum -racx ~/Pictures/Archives | nkf -j
 
     [DIR] /Users/alice/Pictures/Archives/壁紙 (20 files)
     U [ 1/20] 010b9417.jpg => 0100.jpg

@@ -78,6 +78,7 @@ module Saferen
             if command = vc_mv_command(fname, new_fname)
               puts command
             end
+            p new_fname
             if new_fname.exist?
               puts "CollisionError: #{new_fname}"
               @counts[:collision] += 1
@@ -104,9 +105,7 @@ module Saferen
     end
 
     def vc_mv_command(fname, new_fname)
-      if @options[:svn_mv]
-        "svn mv --force '#{fname}' '#{new_fname}'"
-      elsif @options[:git_mv]
+      if @options[:git_mv]
         "git mv '#{fname}' '#{new_fname}'"
       end
     end
@@ -137,7 +136,6 @@ module Saferen
         oparser.on("-x", "--exec", "実際に置換する"){|v|options[:exec] = v}
         oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|v|options[:ignocase] = v}
         oparser.on("-w", "--word-regexp", "単語とみなす"){|v|options[:word] = v}
-        # oparser.on("--svn", "svn mv コマンドでリネーム"){|v|options[:svn_mv] = v}
         oparser.on("--git", "git mv コマンドでリネーム"){|v|options[:git_mv] = v}
       end
 

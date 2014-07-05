@@ -45,8 +45,11 @@ module FileFilter
       /\b(min)\b.*\.(js|css)\z/,
       /(stylesheets|javascripts|assets)\/_+cache/,
 
+
       # 例外的に
       /テキストファイル|版元さんからの画像/,
+      /\b(_sound_data)\b/,
+      /\b(japanese\.txt)\z/,
     ]
 
     if filepath.to_s.match(@file_filter_regexp ||= Regexp.union(*list))
@@ -87,5 +90,9 @@ module FileFilter
     end
 
     false
+  rescue Encoding::CompatibilityError => error
+    # p filepath
+    # p error
+    # raise error
   end
 end
