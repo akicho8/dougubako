@@ -3,23 +3,27 @@
 
 require "pathname"
 require "yaml"
-require_relative '../lib/textjoin_core'
+require_relative '../lib/harden_core'
 
 module TextJoin
   module Gems
     def self.run
-      outputdir = Pathname("/var/textjoin").expand_path
+      outputdir = Pathname("/var/harden").expand_path
       versions = {}
       all_gems = []
-      if false
-        gem_path = "/opt/local/lib/ruby/gems/1.8"
-      else
-        # gem_path = `rvm gemdir`.strip
-        # gem_path = "/usr/local/var/rbenv/versions/1.9.3-p392/lib/ruby/gems/1.9.1"
-        # gem_path = "/usr/local/var/rbenv/versions/2.0.0-p247/lib/ruby/gems/2.0.0"
-        gem_path = "/usr/local/var/rbenv/versions/2.1.1/lib/ruby/gems/2.1.0"
-      end
-      Pathname.glob("#{gem_path}/gems/*").each{|path|
+
+      # gem_path = `rvm gemdir`.strip
+      # gem_path = "/usr/local/var/rbenv/versions/1.9.3-p392/lib/ruby/gems/1.9.1"
+      # gem_path = "/usr/local/var/rbenv/versions/2.0.0-p247/lib/ruby/gems/2.0.0"
+      # gem_path = "/usr/local/var/rbenv/versions/2.1.1/lib/ruby/gems/2.1.0"
+      # gem_path = ""
+      # gem_path = "/usr/local/var/rbenv/versions/2.1.3/lib/ruby/gems/2.1.0"
+      # gem_path = "/usr/local/var/rbenv/versions/2.2.0/lib/ruby/gems/2.2.0"
+
+      ruby_version = RbConfig::CONFIG["ruby_version"]
+      gem_path = "/usr/local/var/rbenv/versions/#{ruby_version}/lib/ruby/gems/#{ruby_version}"
+
+      Pathname.glob("#{gem_path}/gems/*").each do |path|
         all_gems << path
         _path = path.relative_path_from(Pathname(gem_path)) # /Users/xxx/.rvm/gems/ruby-1.9.3-p0/gems/activemodel-3.1.3 → gems/activemodel-3.1.3
         if name = _path.to_s.slice(/[\w\-]+(?=-\d+\..+\z)/)
@@ -33,20 +37,20 @@ module TextJoin
         else
           puts "skip: #{path} は変な表記なので無視します。"
         end
-      }
+      end
 
       # バージョンなし
       print versions.to_yaml
-      versions.each{|name, realpath|
+      versions.each do |name, realpath|
         output_filename = "_" + name.gsub("-", "_").downcase
         TextJoin::Core.run(:source => realpath, :output => outputdir.join(output_filename))
-      }
+      end
 
       # バージョンあり(_activesupport_2_3_5 みたいなもの)
-      all_gems.each{|path|
+      all_gems.each do |path|
         output_filename = "_" + path.basename.to_s.gsub(/\W/, "_").downcase
         TextJoin::Core.run(:source => path.to_s, :output => outputdir.join(output_filename))
-      }
+      end
     end
   end
 end

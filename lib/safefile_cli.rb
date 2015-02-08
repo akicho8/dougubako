@@ -7,7 +7,7 @@ require "pathname"
 require "optparse"
 require "diff/lcs"
 
-require_relative 'file_filter'
+require_relative 'file_ignore'
 
 module Safefile
   VERSION = "1.0.0"
@@ -47,15 +47,15 @@ module Safefile
           run_dir(filename.children)
           next
         end
-        if ignore_file?(filename)
+        if ignore?(filename)
           next
         end
         replace(filename)
       end
     end
 
-    def ignore_file?(filename)
-      if  FileFilter.ignore_file?(filename)
+    def ignore?(filename)
+      if FileIgnore.ignore?(filename)
         return true
       end
       if filename.basename.to_s.match(/\.min\./)
@@ -64,6 +64,7 @@ module Safefile
       if ["development_structure.sql", "schema.rb"].include?(filename.basename.to_s)
         return true
       end
+      false
     end
 
     def replace(filename)
@@ -107,11 +108,11 @@ module Safefile
       #
       if @options[:uniq]
         lines = new_content.lines.to_a
-        lines.each_with_index{|line, i|
+        lines.each_with_index do |line, i|
           if line == lines[i.next]
             lines[i] = nil
           end
-        }
+        end
         new_content = lines.compact.join
       end
 
@@ -176,17 +177,17 @@ module Safefile
           "使い方: #{oparser.program_name} [オプション] ディレクトリ or ファイル...\n",
         ].join
         oparser.on("オプション:")
-        oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
-        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})"){|v|options[:recursive] = v}
-        oparser.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})"){|v|options[:rstrip] = v}
-        oparser.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})"){|v|options[:delete_blank_lines] = v}
-        oparser.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})"){|v|options[:hankaku] = v}
-        oparser.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})"){|v|options[:hankaku_space] = v}
-        oparser.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})"){|v|options[:diff] = v}
-        oparser.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})"){|v|options[:uniq] = v}
-        oparser.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})"){|v|options[:windows] = v}
-        oparser.on("-f", "--force", "強制置換する"){|v|options[:force] = v}
-        # oparser.on("-q", "--quiet", "静かにする(#{options[:quiet]})"){|v|options[:quiet] = v}
+        oparser.on("-x", "--exec", "本当に置換する") {|v| options[:exec] = v }
+        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v| options[:recursive] = v }
+        oparser.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})") {|v| options[:rstrip] = v }
+        oparser.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})") {|v| options[:delete_blank_lines] = v }
+        oparser.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})") {|v| options[:hankaku] = v }
+        oparser.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})") {|v| options[:hankaku_space] = v }
+        oparser.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})") {|v| options[:diff] = v }
+        oparser.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})") {|v| options[:uniq] = v }
+        oparser.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})") {|v| options[:windows] = v }
+        oparser.on("-f", "--force", "強制置換する") {|v| options[:force] = v }
+        # oparser.on("-q", "--quiet", "静かにする(#{options[:quiet]})") {|v| options[:quiet] = v }
         oparser.on(<<-EOT)
 使用例:
     1. カレントディレクトリのすべてのファイルを整形する

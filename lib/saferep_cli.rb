@@ -5,7 +5,7 @@
 
 require "optparse"
 require "timeout"
-require_relative 'file_filter'
+require_relative 'file_ignore'
 
 module Saferep
   VERSION = "2.0.7".freeze
@@ -81,7 +81,7 @@ module Saferep
             skip = false
             begin
               timeout(@options[:timeout]) {
-                skip = ignore_file?(fname)
+                skip = ignore?(fname)
               }
             rescue Timeout::Error
               puts "【警告】#{fname} の読み込みに時間がかかりすぎです。"
@@ -105,10 +105,10 @@ module Saferep
 
     private
 
-    def ignore_file?(fname)
+    def ignore?(fname)
       return false if @options[:all]
       resp = nil
-      resp ||= FileFilter.ignore_file?(fname)
+      resp ||= FileIgnore.ignore?(fname)
       resp ||= fname.basename.to_s.match(/(ChangeLog|\.diff)$/i)
     end
 
@@ -227,21 +227,21 @@ module Saferep
           "使い方: #{oparser.program_name} [オプション] <置換前> <置換後> <ファイル or ディレクトリ>...\n"
         ].join
         oparser.on("オプション:")
-        oparser.on("-x", "--exec", "本当に置換する"){|v|options[:exec] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})"){|v|options[:word] = v}
-        oparser.on("-s", "-Q", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})"){|v|options[:simple] = v}
-        oparser.on("-a", "--all", "フィルタせずにすべてのファイルを対象にする(#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})"){|v|options[:simple_a] = v}
-        oparser.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})"){|v|options[:simple_b] = v}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})"){|v|options[:ignocase] = v}
-        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})"){|v|options[:toutf8] = v}
+        oparser.on("-x", "--exec", "本当に置換する") {|v| options[:exec] = v }
+        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v| options[:word] = v }
+        oparser.on("-s", "-Q", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})") {|v| options[:simple] = v }
+        oparser.on("-a", "--all", "フィルタせずにすべてのファイルを対象にする(#{options[:all]})") {|v| options[:all] = v }
+        oparser.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})") {|v| options[:simple_a] = v }
+        oparser.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})") {|v| options[:simple_b] = v }
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v }
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})") {|v| options[:toutf8] = v }
         oparser.on("レアオプション:")
-        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(#{options[:guess]})"){|v|options[:guess] = v}
-        oparser.on("--[no-]sjis", "文字コードをすべてsjisとする(#{options[:tosjis]})"){|v|options[:tosjis] = v}
-        oparser.on("--head=N", "先頭のn行のみが対象", Integer){|v|options[:head] = v}
-        oparser.on("--limit=N", "N個置換したら打ち切る", Integer){|v|options[:limit] = v}
-        oparser.on("--activesupport", "active_support/core_ext/string.rb を読み込む"){|v|options[:active_support] = v}
-        oparser.on("-d", "--debug", "デバッグ用"){|v|options[:debug] = v}
+        oparser.on("-g", "--guess", "文字コードをNKF.guessで判断する(#{options[:guess]})") {|v| options[:guess] = v }
+        oparser.on("--[no-]sjis", "文字コードをすべてsjisとする(#{options[:tosjis]})") {|v| options[:tosjis] = v }
+        oparser.on("--head=N", "先頭のn行のみが対象", Integer) {|v| options[:head] = v }
+        oparser.on("--limit=N", "N個置換したら打ち切る", Integer) {|v| options[:limit] = v }
+        oparser.on("--activesupport", "active_support/core_ext/string.rb を読み込む") {|v| options[:active_support] = v }
+        oparser.on("-d", "--debug", "デバッグ用") {|v| options[:debug] = v }
         oparser.on("--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 実行例:

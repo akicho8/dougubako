@@ -1,7 +1,4 @@
-/bin/heartbeat
-/bin/textjoin_user
-/misc
-/doc/*.txt
+/bin/harden_user
 /lib/_*
 /lib/log
 /README.html

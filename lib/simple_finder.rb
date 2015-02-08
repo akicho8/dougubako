@@ -4,7 +4,7 @@
 #
 
 require "pathname"
-require_relative 'file_filter'
+require_relative 'file_ignore'
 require "fileutils"
 require "optparse"
 
@@ -35,7 +35,7 @@ module SimpleFinder
       @target_dirs.each do |target_dir|
         target_dir = Pathname(target_dir)
         target_dir.find do |fname|
-          if FileFilter.ignore_file?(fname, :include_directory => !@options[:file_only])
+          if FileIgnore.ignore?(fname, :include_directory => !@options[:file_only])
             next
           end
           execute(target_dir, fname)
@@ -101,15 +101,15 @@ module SimpleFinder
           "使い方: #{Pathname.new($0).basename} [オプション] 検索元 ファイル...\n\n",
         ].join
         oparser.on_head("オプション")
-        oparser.on("-f", "--fullpath", "検索対象をフルパスにする(または/が含まれていれば有効になる)", TrueClass) {|v|options[:fullpath] = v}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|v|options[:word] = v}
-        oparser.on("-q", "--quiet", "必要な情報のみ表示") {|v|options[:quiet] = v}
+        oparser.on("-f", "--fullpath", "検索対象をフルパスにする(または/が含まれていれば有効になる)", TrueClass) {|v| options[:fullpath] = v }
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
+        oparser.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
+        oparser.on("-q", "--quiet", "必要な情報のみ表示") {|v| options[:quiet] = v }
         oparser.on("-c", "--copy-to=DIRRECTORY", "ファイルをコピー", String) {|copy_to|options[:copy_to] = Pathname(copy_to).expand_path}
-        oparser.on("--file-only", "ファイルのみ", TrueClass) {|v|options[:file_only] = v}
-        oparser.on("--rename-from=STRING", "リネーム前", String) {|v|options[:rename_from] = v}
-        oparser.on("--rename-to=STRING", "リネーム後", String) {|v|options[:rename_to] = v}
-        oparser.on("-x", "--exec", "本当に実行する") {|v|options[:exec] = v}
+        oparser.on("--file-only", "ファイルのみ", TrueClass) {|v| options[:file_only] = v }
+        oparser.on("--rename-from=STRING", "リネーム前", String) {|v| options[:rename_from] = v }
+        oparser.on("--rename-to=STRING", "リネーム後", String) {|v| options[:rename_to] = v }
+        oparser.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
         oparser.on_tail("--help", "このヘルプを表示する") {puts oparser; abort}
       end
 

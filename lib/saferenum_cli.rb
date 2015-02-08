@@ -6,7 +6,7 @@
 require 'optparse'
 require 'securerandom'
 require 'fileutils'
-require_relative 'file_filter'
+require_relative 'file_ignore'
 
 module Saferenum
   VERSION = "1.1.1".freeze
@@ -163,15 +163,15 @@ module Saferenum
           "使い方: #{oparser.program_name} [オプション] 対象ディレクトリ...\n",
         ].join
         oparser.on_head("オプション:")
-        oparser.on("-x", "--exec", "実際に実行する(デフォルト:#{options[:exec]})"){|v|options[:exec] = v}
-        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})"){|v|options[:recursive] = v}
-        oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})"){|v|options[:reject_basename] = v}
-        oparser.on("-b", "--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer){|v|options[:base] = v}
-        oparser.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer){|v|options[:step] = v}
-        oparser.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer){|v|options[:zero] = v}
-        oparser.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass){|v|options[:number_only] = v}
-        oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})"){|v|options[:verbose] = v}
+        oparser.on("-x", "--exec", "実際に実行する(デフォルト:#{options[:exec]})") {|v| options[:exec] = v }
+        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v| options[:recursive] = v }
+        oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})") {|v| options[:all] = v }
+        oparser.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})") {|v| options[:reject_basename] = v }
+        oparser.on("-b", "--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer) {|v| options[:base] = v }
+        oparser.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer) {|v| options[:step] = v }
+        oparser.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer) {|v| options[:zero] = v }
+        oparser.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass) {|v| options[:number_only] = v }
+        oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})") {|v| options[:verbose] = v }
         oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
         oparser.on(<<-EOT)
 サンプル:

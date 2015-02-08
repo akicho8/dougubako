@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 require "optparse"
-require_relative 'textjoin_core'
+require_relative 'harden_core'
 
 module TextJoin
   module CLI
@@ -19,9 +19,9 @@ module TextJoin
         ].join
         oparser.on_head("オプション")
         oparser.on
-        oparser.on("-o", "--output=filename", "出力ファイル"){|v|params[:output] = v}
-        oparser.on("-s", "--limisize=limitsize", "指定KB以上のファイルは連結しない(初期値#{params[:limitsize]})"){|v|params[:limitsize] = v}
-        oparser.on("-m", "--filemask=filemask", "指定ファイルのみを連結(初期値/#{params[:filemask]}/)"){|v|params[:filemask] = v}
+        oparser.on("-o", "--output=filename", "出力ファイル") {|v|params[:output] = v }
+        oparser.on("-s", "--limisize=limitsize", "指定KB以上のファイルは連結しない(初期値#{params[:limitsize]})") {|v|params[:limitsize] = v }
+        oparser.on("-m", "--filemask=filemask", "指定ファイルのみを連結(初期値/#{params[:filemask]}/)") {|v|params[:filemask] = v }
         oparser.on_tail("--help", "このヘルプを表示する") {print oparser; exit}
         oparser.on_tail(<<-END)
 

@@ -23,13 +23,13 @@ ARGV.each do |filename|
     image = Magick::Image.read(filename).first
     image = image.normalize.resize_to_fit(columns, lines)
     space = "  "
-    str = image.rows.times.collect do |row|
+    str = image.rows.times.collect {|row|
       image.get_pixels(0, row, image.columns, 1).collect do |pixel|
         rgb = [:red, :green, :blue].inject({}){|h, key|h.merge(key => pixel.send(key) * 6 / 65536)}
         v = 16 + rgb[:red] * 36 + rgb[:green] * 6 + rgb[:blue]
         "\x1b[48;5;#{v}m#{space}\x1b[0m"
       end.join
-    end.join("\n")
+    }.join("\n")
     Curses.clear
     puts str
     STDIN.gets

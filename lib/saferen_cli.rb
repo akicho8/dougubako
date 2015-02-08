@@ -4,7 +4,7 @@
 #
 
 require 'optparse'
-require_relative 'file_filter'
+require_relative 'file_ignore'
 
 module Saferen
   VERSION = "2.0.1".freeze
@@ -78,7 +78,7 @@ module Saferen
             if command = vc_mv_command(fname, new_fname)
               puts command
             end
-            p new_fname
+            # p new_fname
             if new_fname.exist?
               puts "CollisionError: #{new_fname}"
               @counts[:collision] += 1
@@ -133,10 +133,10 @@ module Saferen
           "使い方: #{oparser.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
         ].join
         oparser.on_head("オプション:")
-        oparser.on("-x", "--exec", "実際に置換する"){|v|options[:exec] = v}
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない"){|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす"){|v|options[:word] = v}
-        oparser.on("--git", "git mv コマンドでリネーム"){|v|options[:git_mv] = v}
+        oparser.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
+        oparser.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
+        oparser.on("--git", "git mv コマンドでリネーム") {|v| options[:git_mv] = v }
       end
 
       begin
@@ -164,6 +164,6 @@ module Saferen
 end
 
 if $0 == __FILE__
-  Saferen::CLI.execute(["0011", "00xx", "~/src/three_kingdoms/public/master_images/quest_area"])
+  Saferen::CLI.execute(["0011", "00xx", "~/src/myapp/public/master_images/quest_area"])
   # Saferen::CLI.execute(ARGV)
 end

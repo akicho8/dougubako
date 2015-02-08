@@ -4,7 +4,7 @@
 #
 
 require "optparse"
-require_relative 'file_filter'
+require_relative 'file_ignore'
 
 module Safegrep
   VERSION = '2.0.4'.freeze
@@ -59,7 +59,7 @@ module Safegrep
     def run
       @target_files.each do |target_file|
         Pathname(target_file).find do |filename|
-          if FileFilter.ignore_file?(filename)
+          if FileIgnore.ignore?(filename)
             if @options[:debug]
               puts "skip: #{filename}"
             end
@@ -154,12 +154,12 @@ module Safegrep
           "使い方: #{oparser.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>...\n",
         ].join
         oparser.on("オプション")
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v|options[:ignocase] = v}
-        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v|options[:word] = v}
-        oparser.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})") {|v|options[:escape] = v}
-        oparser.on("-a", "コメント行も含める(#{options[:all]})"){|v|options[:all] = v}
-        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})"){|v|options[:toutf8] = v}
-        oparser.on("-d", "--debug", "デバッグモード"){|v|options[:debug] = v}
+        oparser.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v }
+        oparser.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v| options[:word] = v }
+        oparser.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})") {|v| options[:escape] = v }
+        oparser.on("-a", "コメント行も含める(#{options[:all]})") {|v| options[:all] = v }
+        oparser.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})") {|v| options[:toutf8] = v }
+        oparser.on("-d", "--debug", "デバッグモード") {|v| options[:debug] = v }
         oparser.on("--help", "このヘルプを表示する") {puts oparser; abort}
       end
 
