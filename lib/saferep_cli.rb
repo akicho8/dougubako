@@ -273,6 +273,8 @@ module Saferep
     $ #{oparser.program_name} \":(\\S+)\\s*=>\\s*\" '\#{$1}: '
   例14. HTMLで閉じタグがないのを直す
     $ #{oparser.program_name} '(<(?:img|meta|link|hr)\\b[^>]+[^/])>' '\#{\$1} />'
+  例15. ActiveRecord::Base のサブクラスのモデルの先頭に指定モジュールを include する
+    $ #{oparser.program_name} \"^(class \\S+ < ActiveRecord::Base.*)\" '\#{\$1}\\n  include M'
 EOT
       end
 

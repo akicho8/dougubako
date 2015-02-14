@@ -5,7 +5,7 @@ require "pathname"
 require "yaml"
 require_relative '../lib/harden_core'
 
-module TextJoin
+module Harden
   module Gems
     def self.run
       outputdir = Pathname("/var/harden").expand_path
@@ -43,18 +43,18 @@ module TextJoin
       print versions.to_yaml
       versions.each do |name, realpath|
         output_filename = "_" + name.gsub("-", "_").downcase
-        TextJoin::Core.run(:source => realpath, :output => outputdir.join(output_filename))
+        Harden::Core.run(:source => realpath, :output => outputdir.join(output_filename))
       end
 
       # バージョンあり(_activesupport_2_3_5 みたいなもの)
       all_gems.each do |path|
         output_filename = "_" + path.basename.to_s.gsub(/\W/, "_").downcase
-        TextJoin::Core.run(:source => path.to_s, :output => outputdir.join(output_filename))
+        Harden::Core.run(:source => path.to_s, :output => outputdir.join(output_filename))
       end
     end
   end
 end
 
 if $0 == __FILE__
-  TextJoin::Gems.run
+  Harden::Gems.run
 end

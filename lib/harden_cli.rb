@@ -2,7 +2,7 @@
 require "optparse"
 require_relative 'harden_core'
 
-module TextJoin
+module Harden
   module CLI
     def self.execute(args)
       params = {}
@@ -45,12 +45,12 @@ END
           exit(1)
         end
 
-        TextJoin::Core.run(params.merge(:source => args))
+        Harden::Core.run(params.merge(:source => args))
       end
     end
   end
 end
 
 if $0 == __FILE__
-  TextJoin::CLI.execute(ARGV)
+  Harden::CLI.execute(ARGV)
 end

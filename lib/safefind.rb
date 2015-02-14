@@ -8,7 +8,7 @@ require_relative 'file_ignore'
 require "fileutils"
 require "optparse"
 
-module SimpleFinder
+module Safefind
   class Core
     def self.run(*args)
       new(*args).run
@@ -44,20 +44,21 @@ module SimpleFinder
       result_display
     end
 
-    def execute(basepath, fname)
+    def execute(target_dir, fname)
       if @src_regexp.source.include?("/") || @options[:fullpath]
         # 検索ワードに / が含まれていたらベースネームではなくパスと比較するためそのままにする
         target = fname
       else
         if @options[:copy_to]
-          target = fname.relative_path_from(basepath)
+          target = fname.relative_path_from(target_dir)
         else
           target = fname.basename
         end
       end
       if md = @src_regexp.match(target.to_s)
         file_utils_options = {:noop => !@options[:exec], :verbose => true}
-        if @options[:copy_to]
+        case
+        when @options[:copy_to]
           if @options[:rename_from] && @options[:rename_to]
             target = target.to_s.gsub(Regexp.escape(@options[:rename_from]), @options[:rename_to])
           end
@@ -68,6 +69,8 @@ module SimpleFinder
           unless fname.directory?
             FileUtils.cp(fname, new_path, file_utils_options)
           end
+        when @options[:delete]
+          FileUtils.rm_rf(fname.expand_path.to_s, file_utils_options)
         else
           puts fname.expand_path
         end
@@ -79,13 +82,13 @@ module SimpleFinder
       return if @options[:quiet]
       puts "#{@count}ファイル見つかりました。"
       if @options[:exec]
-        puts "#{@options[:copy_to]} にコピーしました。"
+        puts "本当に実行しました"
       end
     end
   end
 end
 
-module SimpleFinder
+module Safefind
   module CLI
     def self.execute(args)
       options = {
@@ -93,6 +96,7 @@ module SimpleFinder
         :rename_to => nil,
         :file_only => false,
         :fullpath => false,
+        :delete => false,
       }
 
       oparser = OptionParser.new do |oparser|
@@ -109,6 +113,7 @@ module SimpleFinder
         oparser.on("--file-only", "ファイルのみ", TrueClass) {|v| options[:file_only] = v }
         oparser.on("--rename-from=STRING", "リネーム前", String) {|v| options[:rename_from] = v }
         oparser.on("--rename-to=STRING", "リネーム後", String) {|v| options[:rename_to] = v }
+        oparser.on("--delete", "--rm", "ファイル削除", TrueClass) {|v| options[:delete] = v }
         oparser.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
         oparser.on_tail("--help", "このヘルプを表示する") {puts oparser; abort}
       end
@@ -131,11 +136,11 @@ module SimpleFinder
         args << "."
       end
 
-      SimpleFinder::Core.run(src, args, options)
+      Safefind::Core.run(src, args, options)
     end
   end
 end
 
 if $0 == __FILE__
-  SimpleFinder::CLI.execute(ARGV)
+  Safefind::CLI.execute(ARGV)
 end

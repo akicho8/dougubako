@@ -5,7 +5,7 @@ require "fileutils"
 
 require_relative 'file_ignore'
 
-module TextJoin
+module Harden
   class Core
     def self.run(*args)
       new(*args).run
@@ -145,5 +145,5 @@ module TextJoin
 end
 
 if $0 == __FILE__
-  TextJoin::Core.new(:source => "~/bin", :output => "/tmp/a.txt").run
+  Harden::Core.new(:source => "~/bin", :output => "/tmp/a.txt").run
 end
