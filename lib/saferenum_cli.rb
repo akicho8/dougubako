@@ -26,9 +26,9 @@ module Saferenum
     end
 
     def run
-      @dirs.each{|dir|
+      @dirs.each do |dir|
         Runner.new(self, dir)
-      }
+      end
       puts "差分:#{@counts[:diff]} ディレクトリ数:#{@counts[:diff]} ファイル数:#{@counts[:count]} 個を処理しました。"
       unless @options[:exec]
         puts "本当に実行するには -x オプションを付けてください。"
@@ -132,9 +132,9 @@ module Saferenum
       # 不要なファイルやディレクトリを除外する
       #
       def reject_files(all)
-        all = all.reject{|e|e.basename.to_s.match(/\A[\._]/)}           # .svn .git _* などを除外
-        all = all.reject{|e|e.to_s.match(Regexp.union("#", "~", "%"))}  # テンポラリファイルを除外
-        all = all.reject{|e|e.to_s.match(/\.(elc)\z/)}
+        all = all.reject {|e| e.basename.to_s.match(/\A[\._]/) }           # .svn .git _* などを除外
+        all = all.reject {|e| e.to_s.match(Regexp.union("#", "~", "%")) }  # テンポラリファイルを除外
+        all = all.reject {|e| e.to_s.match(/\.(elc)\z/) }
       end
     end
   end
@@ -156,29 +156,29 @@ module Saferenum
         :noop            => $DEBUG, # デバッグ時は true にする
       }
 
-      oparser = OptionParser.new do |oparser|
-        oparser.version = VERSION
-        oparser.banner = [
-          "ファイル名リナンバー #{oparser.ver}\n",
-          "使い方: #{oparser.program_name} [オプション] 対象ディレクトリ...\n",
+      oparser = OptionParser.new do |opts|
+        opts.version = VERSION
+        opts.banner = [
+          "ファイル名リナンバー #{opts.ver}\n",
+          "使い方: #{opts.program_name} [オプション] 対象ディレクトリ...\n",
         ].join
-        oparser.on_head("オプション:")
-        oparser.on("-x", "--exec", "実際に実行する(デフォルト:#{options[:exec]})") {|v| options[:exec] = v }
-        oparser.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v| options[:recursive] = v }
-        oparser.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})") {|v| options[:all] = v }
-        oparser.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})") {|v| options[:reject_basename] = v }
-        oparser.on("-b", "--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer) {|v| options[:base] = v }
-        oparser.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer) {|v| options[:step] = v }
-        oparser.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer) {|v| options[:zero] = v }
-        oparser.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass) {|v| options[:number_only] = v }
-        oparser.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})") {|v| options[:verbose] = v }
-        oparser.on("-h", "--help", "このヘルプを表示する"){puts oparser; abort}
-        oparser.on(<<-EOT)
+        opts.on_head("オプション:")
+        opts.on("-x", "--exec", "実際に実行する(デフォルト:#{options[:exec]})") {|v| options[:exec] = v }
+        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v| options[:recursive] = v }
+        opts.on("-a", "--all", "すべてのファイルを対象にする？(デフォルト:#{options[:all]})") {|v| options[:all] = v }
+        opts.on("-c", "--reject-basename", "ベースネームを捨てる？(デフォルト:#{options[:reject_basename]})") {|v| options[:reject_basename] = v }
+        opts.on("-b", "--base=INTEGER", "インデックスの最初(デフォルト:#{options[:base]})", Integer) {|v| options[:base] = v }
+        opts.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer) {|v| options[:step] = v }
+        opts.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer) {|v| options[:zero] = v }
+        opts.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass) {|v| options[:number_only] = v }
+        opts.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})") {|v| options[:verbose] = v }
+        opts.on("-h", "--help", "このヘルプを表示する"){puts opts; abort}
+        opts.on(<<-EOT)
 サンプル:
     例1. カレントディレクトリの《番号_名前.拡張子》形式のファイルを同じ形式でリナンバーする
-        % #{oparser.program_name} .
+        % #{opts.program_name} .
     例2. 指定ディレクトリ以下のすべてのファイルを《番号.拡張子》形式にリネームする
-        % #{oparser.program_name} -rac ~/Pictures/Archives
+        % #{opts.program_name} -rac ~/Pictures/Archives
 EOT
       end
 

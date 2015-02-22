@@ -59,7 +59,7 @@ module Safethumb
     end
 
     def run
-      target_files.each{|current_file|
+      target_files.each do |current_file|
         puts "input: #{current_file}"
         @movie = FFMPEG::Movie.new(current_file.to_s)
         case @config[:mode]
@@ -79,7 +79,7 @@ module Safethumb
           raise "must not happen"
         end
 
-        seeks.each_with_index{|seek, index|
+        seeks.each_with_index do |seek, index|
           options = {
             :seek_time => seek,
             :custom => @config[:convert],
@@ -92,8 +92,8 @@ module Safethumb
           if @config[:exec]
             @movie.transcode(fname.to_s, options)
           end
-        }
-      }
+        end
+      end
       if @config[:exec]
         if @config[:open] && RUBY_PLATFORM.match(/darwin/)
           `open #{outdir}/#{@config[:prefix]}*`
@@ -106,8 +106,8 @@ module Safethumb
     end
 
     def generate_seeks(step, count)
-      seeks = (0...count).enum_for(:each_with_index).collect{|value, index|step * index}
-      seeks.collect{|v|float_to_time(v)}
+      seeks = (0...count).enum_for(:each_with_index).collect {|value, index| step * index }
+      seeks.collect {|v| float_to_time(v) }
     end
 
     def float_to_time(v)
@@ -116,7 +116,7 @@ module Safethumb
     end
 
     def target_files
-      @files.collect{|file|Pathname(file).expand_path}
+      @files.collect {|file| Pathname(file).expand_path }
     end
 
     def outdir
@@ -134,43 +134,43 @@ module Safethumb
           :exec => false,
         })
 
-      oparser = OptionParser.new do |oparser|
-        oparser.version = "0.1.0"
-        oparser.banner = [
-          "サムネイル生成スクリプト #{oparser.ver}\n\n",
-          "使い方: #{oparser.program_name} [オプション] files...\n\n",
+      oparser = OptionParser.new do |opts|
+        opts.version = "0.1.0"
+        opts.banner = [
+          "サムネイル生成スクリプト #{opts.ver}\n\n",
+          "使い方: #{opts.program_name} [オプション] files...\n\n",
         ].join
-        oparser.on_head("オプション:")
-        oparser.on
-        oparser.on("-m", "--mode=MODE", "モード(random|div|step)(default: #{config[:mode]})", String) {|v|config[:mode] = v }
-        oparser.on("-o", "--outdir=DIR", "出力ディレクトリ(default: #{config[:outdir]})", String) {|v|config[:outdir] = v }
-        oparser.on("-p", "--prefix=PREFIX", "プレフィクス(default: #{config[:prefix]})", String) {|v|config[:prefix] = v }
-        oparser.on("-c", "--count=COUNT", "生成数(default: #{config[:count]})", Integer) {|v|config[:count] = v }
-        oparser.on("--ext=EXTNAME", "拡張子(default: #{config[:extname]})", String) {|v|config[:extname] = v }
-        oparser.on("--convert=ARGS", "ffmpeg引数(default: #{config[:convert]})", String) {|v|config[:convert] = v }
-        oparser.on("-x", "--[no-]exec", "本当に実行する(default: #{config[:exec]})", TrueClass) {|v|config[:exec] = v }
-        oparser.on("--open", "実行後の確認(default: #{config[:open]})", TrueClass) {|v|config[:open] = v }
-        oparser.on("--step=STEP", "stepモードで分割するときのステップ(default: #{config[:step]})", Float) {|v|config[:step] = v }
-        oparser.on("--clean", "出力ディレクトリを削除するか", TrueClass) {|v|config[:clean] = v }
-        oparser.on(<<-EOT)
+        opts.on_head("オプション:")
+        opts.on
+        opts.on("-m", "--mode=MODE", "モード(random|div|step)(default: #{config[:mode]})", String) {|v|config[:mode] = v }
+        opts.on("-o", "--outdir=DIR", "出力ディレクトリ(default: #{config[:outdir]})", String) {|v|config[:outdir] = v }
+        opts.on("-p", "--prefix=PREFIX", "プレフィクス(default: #{config[:prefix]})", String) {|v|config[:prefix] = v }
+        opts.on("-c", "--count=COUNT", "生成数(default: #{config[:count]})", Integer) {|v|config[:count] = v }
+        opts.on("--ext=EXTNAME", "拡張子(default: #{config[:extname]})", String) {|v|config[:extname] = v }
+        opts.on("--convert=ARGS", "ffmpeg引数(default: #{config[:convert]})", String) {|v|config[:convert] = v }
+        opts.on("-x", "--[no-]exec", "本当に実行する(default: #{config[:exec]})", TrueClass) {|v|config[:exec] = v }
+        opts.on("--open", "実行後の確認(default: #{config[:open]})", TrueClass) {|v|config[:open] = v }
+        opts.on("--step=STEP", "stepモードで分割するときのステップ(default: #{config[:step]})", Float) {|v|config[:step] = v }
+        opts.on("--clean", "出力ディレクトリを削除するか", TrueClass) {|v|config[:clean] = v }
+        opts.on(<<-EOT)
 
 サンプル:
 
     ■ランダムに4個のサムネを生成する
 
-      $ #{oparser.program_name} input.flv --mode=random --count=4
+      $ #{opts.program_name} input.flv --mode=random --count=4
 
     ■トータル時間を4分割して4つのサムネを生成する(8秒の動画なら0,2,4,6秒時のサムネになる)
 
-      $ #{oparser.program_name} input.flv --mode=div --count=4
+      $ #{opts.program_name} input.flv --mode=div --count=4
 
     ■0.5秒ずつのサムネを生成する(4秒の動画なら8つのサムネができる)
 
-      $ #{oparser.program_name} input.flv --mode=step --step=0.5
+      $ #{opts.program_name} input.flv --mode=step --step=0.5
 
     ■0.5秒ずつのサムネを4つ生成する(4秒の動画なら 0, 0.5, 1.0, 1.5 秒時の4つだけ)
 
-      $ #{oparser.program_name} input.flv --mode=step --step=0.5 --count=4
+      $ #{opts.program_name} input.flv --mode=step --step=0.5 --count=4
 
 EOT
       end

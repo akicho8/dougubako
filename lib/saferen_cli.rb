@@ -126,17 +126,17 @@ module Saferen
     def self.execute(args)
       options = {}
 
-      oparser = OptionParser.new do |oparser|
-        oparser.version = VERSION
-        oparser.banner = [
-          "ファイル・デイレクトリ名置換 #{oparser.ver}\n",
-          "使い方: #{oparser.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
+      oparser = OptionParser.new do |opts|
+        opts.version = VERSION
+        opts.banner = [
+          "ファイル・デイレクトリ名置換 #{opts.ver}\n",
+          "使い方: #{opts.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
         ].join
-        oparser.on_head("オプション:")
-        oparser.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
-        oparser.on("--git", "git mv コマンドでリネーム") {|v| options[:git_mv] = v }
+        opts.on_head("オプション:")
+        opts.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
+        opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
+        opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
+        opts.on("--git", "git mv コマンドでリネーム") {|v| options[:git_mv] = v }
       end
 
       begin

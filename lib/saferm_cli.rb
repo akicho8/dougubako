@@ -59,16 +59,16 @@ module Saferm
   module CLI
     def self.execute(args)
       options = {}
-      oparser = OptionParser.new do |oparser|
-        oparser.banner = [
+      oparser = OptionParser.new do |opts|
+        opts.banner = [
           "ファイル削除 Version 1.0.0\n\n",
           "使い方: #{Pathname.new($0).basename} [オプション] 検索元 ファイル...\n\n",
         ].join
-        oparser.on_head("オプション")
-        oparser.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
-        oparser.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
-        oparser.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
-        oparser.on_tail("--help", "このヘルプを表示する") {puts oparser; abort}
+        opts.on_head("オプション")
+        opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
+        opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
+        opts.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
+        opts.on_tail("--help", "このヘルプを表示する") {puts opts; abort}
       end
 
       begin

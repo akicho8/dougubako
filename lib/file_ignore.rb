@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-
 require "pathname"
 require "kconv"
 
 module FileIgnore
   extend self
 
-  #
   # 検索・置換対象から外すか？
-  #
   def ignore?(filepath, options = {})
     filepath = Pathname(filepath).expand_path
 
