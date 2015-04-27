@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # 関連ファイル検索ツール
-#
 
 require "pathname"
 require_relative 'file_ignore'
@@ -93,10 +90,10 @@ module Safefind
     def self.execute(args)
       options = {
         :rename_from => nil,
-        :rename_to => nil,
-        :file_only => false,
-        :fullpath => false,
-        :delete => false,
+        :rename_to   => nil,
+        :file_only   => false,
+        :fullpath    => false,
+        :delete      => false,
       }
 
       oparser = OptionParser.new do |opts|
@@ -115,7 +112,7 @@ module Safefind
         opts.on("--rename-to=STRING", "リネーム後", String) {|v| options[:rename_to] = v }
         opts.on("--delete", "--rm", "ファイル削除", TrueClass) {|v| options[:delete] = v }
         opts.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
-        opts.on_tail("--help", "このヘルプを表示する") {puts opts; abort}
+        opts.on("--help", "このヘルプを表示する") {puts opts; abort}
       end
 
       begin

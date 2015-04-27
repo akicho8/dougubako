@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 require "test_helper"
 
 class TestSaferenum < Test::Unit::TestCase
@@ -15,11 +14,11 @@ class TestSaferenum < Test::Unit::TestCase
   end
 
   test "help" do
-    assert_equal 1, `#{LIB_ROOT}/bin/saferenum`.lines.grep(/--help/).size
+    assert_equal 1, `#{_bin(:saferenum)}`.lines.grep(/--help/).size
   end
 
   test "実行結果の確認" do
-    @output = `#{LIB_ROOT}/bin/saferenum -x -r --base=2000 --step=100 testdir`
+    @output = `#{_bin(:saferenum)} -x -r --base=2000 --step=100 testdir`
     assert_match %r/ 0000_b2.txt => 02100_b2.txt/, @output
     assert_match %r/ 0000_a2.txt => 02100_a2.txt/, @output
   end

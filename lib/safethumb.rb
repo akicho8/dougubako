@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # 動画からサムネイルを生成するツール
-#
 
 require "rubygems"
 require "streamio-ffmpeg"

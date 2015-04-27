@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # テキストファイル置換ツール
-#
 
 require "optparse"
 require "timeout"

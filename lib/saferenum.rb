@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # ファイル名リナンバー
-#
 
 require 'optparse'
 require 'securerandom'

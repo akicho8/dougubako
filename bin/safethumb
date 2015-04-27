@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
-require_relative '../lib/safethumb_cli'
+require_relative '../lib/safethumb'
 Safethumb::CLI.execute(ARGV)

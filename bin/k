@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
-require_relative '../lib/safekill_cli'
+require_relative '../lib/safekill'
 Safekill.new(*ARGV).run

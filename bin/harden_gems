@@ -3,7 +3,7 @@
 
 require "pathname"
 require "yaml"
-require_relative '../lib/harden_core'
+require_relative '../lib/harden'
 
 module Harden
   module Gems

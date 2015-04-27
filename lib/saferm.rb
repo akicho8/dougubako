@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # ファイル削除ツール
-#
 
 require "pathname"
 require_relative 'file_ignore'
@@ -68,7 +65,7 @@ module Saferm
         opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
         opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
         opts.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
-        opts.on_tail("--help", "このヘルプを表示する") {puts opts; abort}
+        opts.on("--help", "このヘルプを表示する") {puts opts; abort}
       end
 
       begin

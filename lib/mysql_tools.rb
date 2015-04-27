@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 require "bundler/setup"
 require "pathname"
 require "optparse"
@@ -80,9 +79,7 @@ module MysqlTools
       ["information_schema", "mysql", "test"]
     end
   end
-end
 
-module MysqlTools
   module CLI
     def self.execute(args)
       options = {}

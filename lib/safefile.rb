@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-#
 # ファイル整形
-#
 
 require "pathname"
 require "optparse"
 require "diff/lcs"
-
-require_relative 'file_ignore'
+require_relative "file_ignore"
 
 module Safefile
   VERSION = "1.0.0"

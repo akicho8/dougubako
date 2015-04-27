@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-#
 # 文字列検索ツール
-#
 
 require "optparse"
 require_relative 'file_ignore'
