@@ -12,22 +12,11 @@ module Harden
       versions = {}
       all_gems = []
 
-      # gem_path = `rvm gemdir`.strip
-      # gem_path = "/usr/local/var/rbenv/versions/1.9.3-p392/lib/ruby/gems/1.9.1"
-      # gem_path = "/usr/local/var/rbenv/versions/2.0.0-p247/lib/ruby/gems/2.0.0"
-      # gem_path = "/usr/local/var/rbenv/versions/2.1.1/lib/ruby/gems/2.1.0"
-      # gem_path = ""
-      # gem_path = "/usr/local/var/rbenv/versions/2.1.3/lib/ruby/gems/2.1.0"
-      # gem_path = "/usr/local/var/rbenv/versions/2.2.0/lib/ruby/gems/2.2.0"
-
-      ruby_version = RbConfig::CONFIG["ruby_version"]
-      gem_path = "/usr/local/var/rbenv/versions/#{ruby_version}/lib/ruby/gems/#{ruby_version}"
-
-      Pathname.glob("#{gem_path}/gems/*").each do |path|
+      gemdir = `gem env gemdir`.strip
+      Pathname.glob("#{gemdir}/gems/*").each do |path|
         all_gems << path
-        _path = path.relative_path_from(Pathname(gem_path)) # /Users/xxx/.rvm/gems/ruby-1.9.3-p0/gems/activemodel-3.1.3 → gems/activemodel-3.1.3
+        _path = path.relative_path_from(Pathname(gemdir)) # path/to/gems/ruby-1.9.3-p0/gems/activemodel-3.1.3 → gems/activemodel-3.1.3
         if name = _path.to_s.slice(/[\w\-]+(?=-\d+\..+\z)/)
-          # p [name, path]
           if versions[name]
             # 新しいバージョンの方だけにする
             versions[name] = [versions[name], path.to_s].max
