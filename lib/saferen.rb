@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ファイル and ディレクトリ名置換
 
 require 'optparse'

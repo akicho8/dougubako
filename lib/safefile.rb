@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ファイル整形
 
 require "pathname"
@@ -119,7 +120,7 @@ module Safefile
 
       mark = nil
       desc = nil
-      count = Diff::LCS.sdiff(source.lines.to_a, new_content.lines.to_a).count{|diff|diff.action == "!"}
+      count = Diff::LCS.sdiff(source.lines.to_a, new_content.lines.to_a).count {|e| e.action == "!" }
       @counts[:diff] += count
       @counts[:file] += 1
       if count >= 1 || @options[:force]
@@ -127,7 +128,7 @@ module Safefile
         mark = "U"
         desc = "(#{count} diffs)"
         if @options[:exec]
-          filename.open("w"){|f|f << new_content}
+          filename.write(new_content)
         end
       end
       if mark
@@ -140,7 +141,7 @@ module Safefile
 
     def diff_display(filename, old_content, new_content)
       diffs = Diff::LCS.sdiff(old_content.lines.to_a, new_content.lines.to_a) # すべての行のdiffをとる
-      diffs = diffs.find_all{|e|e.old_element != e.new_element}               # 異なる行だけに絞る
+      diffs = diffs.find_all {|e| e.old_element != e.new_element }               # 異なる行だけに絞る
       diffs.each_with_index do |diff, index|
         puts "-------------------------------------------------------------------------------- [#{index.next}/#{diffs.size}]"
         puts "#{filename}:#{diff.old_position.next}: - #{diff.old_element.lstrip}" if diff.old_element

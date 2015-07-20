@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 文字列検索ツール
 
 require "optparse"
@@ -90,7 +91,7 @@ module Safegrep
               next
             end
             line = line.clone
-            if line.gsub!(@source_string){
+            if line.gsub!(@source_string) {
                 count += 1
                 "【#{$&}】"
               }
@@ -162,7 +163,7 @@ module Safegrep
 
       begin
         oparser.parse!(args)
-      rescue OptionParser::InvalidOption
+      rescue OptionParser::InvalidOption => error
         puts error
         usage(oparser)
       end

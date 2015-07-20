@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 関連ファイル検索ツール
 
 require "pathname"

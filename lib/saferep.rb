@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # テキストファイル置換ツール
 
 require "optparse"
@@ -169,7 +170,7 @@ module Saferep
             if guess
               out = out.kconv(guess, NKF::UTF8)
             end
-            fname.open("w"){|f|f << out}
+            fname.write(out)
             fname.chmod(bak.stat.mode)
           end
         end
