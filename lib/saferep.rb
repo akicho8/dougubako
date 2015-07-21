@@ -170,7 +170,7 @@ module Saferep
             if guess
               out = out.kconv(guess, NKF::UTF8)
             end
-            fname.write(out)
+            fname.open("w") {|f| f << out }
             fname.chmod(bak.stat.mode)
           end
         end
