@@ -94,6 +94,7 @@ module FileIgnore
       /テキストファイル|版元さんからの画像/,
       /\b(_sound_data)\b/,
       /\b(japanese\.txt)\z/,
+      /tmp\/deploy/,
     ]
   end
 end
