@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require "pathname"
+require "optparse"
+
+@execute = false
+options = {}
+oparser = OptionParser.new do |o|
+  o.on("-x") {|e| @execute = e}
+end
+args = oparser.parse(ARGV)
+
+args.each do |e|
+  Pathname(e).find do |e|
+    next unless e.extname == ".erb"
+    e = e.expand_path
+    slim = Pathname(e.to_s.gsub(/\.erb\z/, ".slim"))
+    command = "erb2slim #{e} #{slim} && rm #{e}"
+    puts command
+    system("erb2slim #{e} #{slim} && rm #{e}") if @execute
+  end
+end
