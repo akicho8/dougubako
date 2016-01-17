@@ -39,11 +39,11 @@ module Saferenum
       def initialize(base, dir)
         @base = base
         dir = Pathname(dir).expand_path
-        all = dir.children                                    # すべてのファイルとサブディレクトリ
+        all = dir.children      # すべてのファイルとサブディレクトリ
         all = reject_files(all)
-        all = all.sort                                        # TODO:数値としてソートする機能を入れる
-        files = all.find_all{|entry|!entry.directory?}        # ファイルのみ
-        dirs = all.find_all{|entry|entry.directory?}          # ディレクトリのみ
+        all = all.sort
+        files = all.find_all { |e| !e.directory? } # ファイルのみ
+        dirs = all - files              # ディレクトリのみ
 
         # サブディレクトリを処理
         if @base.options[:recursive]
