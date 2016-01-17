@@ -78,7 +78,7 @@ module Saferep
             end
             skip = false
             begin
-              timeout(@options[:timeout]) do
+              Timeout.timeout(@options[:timeout]) do
                 skip = ignore?(fname)
               end
             rescue Timeout::Error
