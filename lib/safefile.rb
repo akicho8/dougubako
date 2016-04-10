@@ -211,7 +211,7 @@ EOT
         abort
       end
 
-      Safefile::Core.run(args, options)
+      Core.run(args, options)
     end
   end
 end

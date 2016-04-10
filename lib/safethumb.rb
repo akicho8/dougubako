@@ -178,7 +178,7 @@ EOT
         puts oparser
         abort
       end
-      Safethumb::Core.run(args, config)
+      Core.run(args, config)
     end
   end
 end

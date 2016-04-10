@@ -178,7 +178,7 @@ module Safegrep
         args << "."
       end
 
-      Safegrep::Core.run(src, args, options)
+      Core.run(src, args, options)
     end
 
     def usage(oparser)

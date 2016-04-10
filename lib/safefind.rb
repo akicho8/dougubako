@@ -134,7 +134,7 @@ module Safefind
         args << "."
       end
 
-      Safefind::Core.run(src, args, options)
+      Core.run(src, args, options)
     end
   end
 end

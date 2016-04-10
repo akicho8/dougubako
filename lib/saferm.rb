@@ -87,7 +87,7 @@ module Saferm
         args << "."
       end
 
-      Saferm::Core.run(src, args, options)
+      Core.run(src, args, options)
     end
   end
 end

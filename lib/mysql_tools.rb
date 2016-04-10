@@ -123,7 +123,7 @@ EOT
         abort
       end
 
-      MysqlTools::Core.run(args.first, args.drop(1), options)
+      Core.run(args.first, args.drop(1), options)
     end
   end
 end

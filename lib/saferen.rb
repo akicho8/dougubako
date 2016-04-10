@@ -156,7 +156,7 @@ module Saferen
         args << "."
       end
 
-      Saferen::Core.run(source_regexp, dest_text, args, options)
+      Core.run(source_regexp, dest_text, args, options)
     end
   end
 end

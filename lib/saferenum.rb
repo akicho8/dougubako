@@ -193,7 +193,7 @@ EOT
         abort
       end
 
-      Saferenum::Core.run(args, options)
+      Core.run(args, options)
     end
   end
 end
