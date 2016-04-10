@@ -5,7 +5,7 @@ require 'optparse'
 require_relative 'file_ignore'
 
 module Saferen
-  VERSION = "2.0.1".freeze
+  VERSION = "2.0.1"
 
   class Core
     def self.run(*args, &block)

@@ -6,7 +6,7 @@ require "timeout"
 require_relative 'file_ignore'
 
 module Saferep
-  VERSION = "2.0.7".freeze
+  VERSION = "2.0.7"
 
   class Core
     def self.run(*args)

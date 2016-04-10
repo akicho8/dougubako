@@ -5,7 +5,7 @@ require "optparse"
 require_relative 'file_ignore'
 
 module Safegrep
-  VERSION = '2.0.4'.freeze
+  VERSION = '2.0.4'
 
   class Core
     def self.run(*args)

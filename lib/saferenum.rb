@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative 'file_ignore'
 
 module Saferenum
-  VERSION = "1.1.1".freeze
+  VERSION = "1.1.1"
 
   class Core
     attr_reader :options
