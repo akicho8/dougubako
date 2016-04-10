@@ -25,6 +25,7 @@ module Saferep
         :tosjis   => false,
         :guess    => false,
         :all      => false,
+        :tate     => false,
       }
     end
 
@@ -98,7 +99,7 @@ module Saferep
           end
         end
       end
-      resp_display
+      response_display
     end
 
     private
@@ -145,7 +146,13 @@ module Saferep
                   eval(%("#{@dest}"), binding)
                 end
               }
-              puts "#{fname}(#{index.succ}):【#{line.strip}】→【#{new_line.strip}】"
+              if @options[:tate]
+                puts "#{fname}(#{index.succ}):"
+                puts "  【#{line.strip}】"
+                puts "  【#{new_line.strip}】"
+              else
+                puts "#{fname}(#{index.succ}):【#{line.strip}】→【#{new_line.strip}】"
+              end
               if @options[:limit] && count >= @options[:limit]
                 @stop = true
                 break
@@ -170,7 +177,7 @@ module Saferep
             if guess
               out = out.kconv(guess, NKF::UTF8)
             end
-            fname.open("w") {|f| f << out }
+            fname.write(out)
             fname.chmod(bak.stat.mode)
           end
         end
@@ -178,7 +185,7 @@ module Saferep
       @counts[:replace] += count
     end
 
-    def resp_display
+    def response_display
       unless @log.empty?
         puts
         puts @log.join("\n")
@@ -232,6 +239,7 @@ module Saferep
         opts.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})") {|v| options[:simple_a] = v }
         opts.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})") {|v| options[:simple_b] = v }
         opts.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v }
+        opts.on("-l", "置換情報を縦に表示する(#{options[:tate]})") {|v| options[:tate] = v }
         opts.on("-u", "--[no-]utf8", "半角カナを全角カナに統一して置換(#{options[:toutf8]})") {|v| options[:toutf8] = v }
         opts.on("レアオプション:")
         opts.on("-g", "--guess", "文字コードをNKF.guessで判断する(#{options[:guess]})") {|v| options[:guess] = v }
@@ -295,7 +303,7 @@ EOT
         args << "."
       end
 
-      Saferep::Core.run(src, dest, args, options)
+      Core.run(src, dest, args, options)
     end
 
     def usage(oparser)
