@@ -119,8 +119,8 @@ module Safegrep
       if filename.extname.match(/\b(el)\b/)
         return line.match(/^\s*;/)
       end
-      if line.match(/^\s*#/)
-        return true
+      if filename.extname == ".rb"
+        return line.match(/^\s*#/)
       end
       false
     end
