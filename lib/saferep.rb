@@ -6,7 +6,7 @@ require "timeout"
 require_relative 'file_ignore'
 
 module Saferep
-  VERSION = "2.0.7"
+  VERSION = "2.0.8"
 
   class Core
     def self.run(*args)
@@ -273,6 +273,8 @@ module Saferep
     $ #{opts.program_name} '(<(?:img|meta|link|hr)\\b[^>]+[^/])>' '\#{\$1} />'
   例15. ActiveRecord::Base のサブクラスのモデルの先頭に指定モジュールを include する
     $ #{opts.program_name} \"^(class \\S+ < ActiveRecord::Base.*)\" '\#{\$1}\\n  include M'
+  例16. Rubyのマジックコメント '# -*- coding: utf-8 -*-' の行を改行を含めて消す
+    $ #{opts.program_name} '# -\\*- coding: utf-8 -\\*-\\n' ''
 EOT
       end
 
