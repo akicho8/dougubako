@@ -77,7 +77,7 @@ module FileIgnore
     [
       # 拡張子
       /\.(sql|sqlite3|cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|\.del-.*)\z/,
-      /\.(au|pdf|pptx|fla|flv|avi|ttf|mp3|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xls|ppt|ico|pid|tmp)\z/i,
+      /\.(au|pdf|pptx|fla|flv|avi|ttf|mp3|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xlsx?|ppt|ico|pid|tmp)\z/i,
       # 単語
       /\b(RDEFSX|RDEFS|RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/i,
       /\b(cache|password_dic|coverage|public\/assets)\b/,
