@@ -2,10 +2,11 @@
 # 文字列検索ツール
 
 require "optparse"
+require "active_support/core_ext/string/inflections"
 require_relative 'file_ignore'
 
 module Safegrep
-  VERSION = '2.0.4'
+  VERSION = '2.0.5'
 
   class Core
     def self.run(*args)
@@ -20,6 +21,7 @@ module Safegrep
         :all      => false,
         :ignocase => false,
         :guess    => false,
+        :fuzzy    => false,
       }
     end
 
@@ -43,6 +45,19 @@ module Safegrep
 
       if @options[:word]
         @source_string = "\\b#{@source_string}\\b"
+      end
+
+      if @options[:fuzzy]
+        @source_string = @source_string.sub(/key_type\z/, '')
+        @source_string = @source_string.sub(/type_key\z/, '')
+        @source_string = @source_string.sub(/(key|type)\z/, '')
+        @source_string = @source_string.sub(/\A_*(.*?)_*\z/, '\1')
+
+        @source_string = Regexp.union(*[
+            /#{@source_string}/i,
+            /#{@source_string.underscore}/i,
+            /#{@source_string.camelize}/i,
+          ])
       end
 
       option = 0
@@ -154,6 +169,7 @@ module Safegrep
         opts.on("オプション")
         opts.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v }
         opts.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v| options[:word] = v }
+        opts.on("-f", "--fuzzy", "曖昧検索(#{options[:fuzzy]})") {|v| options[:fuzzy] = v }
         opts.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})") {|v| options[:escape] = v }
         opts.on("-a", "コメント行も含める(#{options[:all]})") {|v| options[:all] = v }
         opts.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})") {|v| options[:toutf8] = v }
