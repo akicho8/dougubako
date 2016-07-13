@@ -25,38 +25,37 @@ module Safegrep
       }
     end
 
-    def initialize(source_string, target_files, options = {})
-      @source_string = source_string
-      @target_files = target_files
-
+    def initialize(str, files, options = {})
+      @str = str
+      @files = files
       @options = self.class.default_options.merge(options)
 
       if @options[:toutf8]
-        @source_string = @source_string.toutf8
+        @str = @str.toutf8
       end
 
       @log = []
-      @error_logs = []
+      @errors = []
       @counts = Hash.new(0)
 
       if @options[:escape]
-        @source_string = Regexp.quote(@source_string)
+        @str = Regexp.quote(@str)
       end
 
       if @options[:word]
-        @source_string = "\\b#{@source_string}\\b"
+        @str = "\\b#{@str}\\b"
       end
 
       if @options[:fuzzy]
-        @source_string = @source_string.sub(/key_type\z/, '')
-        @source_string = @source_string.sub(/type_key\z/, '')
-        @source_string = @source_string.sub(/(key|type)\z/, '')
-        @source_string = @source_string.sub(/\A_*(.*?)_*\z/, '\1')
+        @str = @str.sub(/key_type\z/, '')
+        @str = @str.sub(/type_key\z/, '')
+        @str = @str.sub(/(key|type)\z/, '')
+        @str = @str.sub(/\A_*(.*?)_*\z/, '\1')
 
-        @source_string = Regexp.union(*[
-            /#{@source_string}/i,
-            /#{@source_string.underscore}/i,
-            /#{@source_string.camelize}/i,
+        @str = Regexp.union(*[
+            /#{@str}/i,
+            /#{@str.underscore}/i,
+            /#{@str.camelize}/i,
           ])
       end
 
@@ -64,21 +63,21 @@ module Safegrep
       if @options[:ignocase]
         option |= Regexp::IGNORECASE
       end
-      @source_string = Regexp.compile(@source_string, option)
+      @str = Regexp.compile(@str, option)
 
-      puts "検索言:【#{@source_string.source}】(大小文字を区別#{@source_string.casefold? ? "しない" : "する"})"
+      puts "検索言:【#{@str.source}】(大小文字を区別#{@str.casefold? ? "しない" : "する"})"
     end
 
     def run
-      @target_files.each do |target_file|
-        Pathname(target_file).find do |filename|
-          if FileIgnore.ignore?(filename)
+      @files.each do |e|
+        Pathname(e).find do |file|
+          if FileIgnore.ignore?(file)
             if @options[:debug]
-              puts "skip: #{filename}"
+              puts "skip: #{file}"
             end
             next
           end
-          grep_execute(filename)
+          file_read(file)
         end
       end
       result_display
@@ -86,55 +85,55 @@ module Safegrep
 
     private
 
-    def grep_execute(filename)
+    def file_read(file)
+      file = file.expand_path
       if @options[:debug]
-        puts "process: #{filename}"
+        puts "read: #{file}"
       end
-      filename = filename.expand_path
       count = 0
       begin
-        buffer = filename.read
+        buffer = file.read
       rescue Errno::EISDIR => error
         STDERR.puts "警告: #{error}"
       else
         if @options[:toutf8]
           buffer = buffer.toutf8
         end
-        buffer.lines.each_with_index do |line, index|
+        buffer.lines.each_with_index do |line, i|
           begin
-            if comment_skip?(filename, line)
+            if comment_skip?(file, line)
               next
             end
             line = line.clone
-            if line.gsub!(@source_string) {
+            if line.gsub!(@str) {
                 count += 1
                 "【#{$&}】"
               }
-              puts "#{filename}(#{index.succ}): #{line.strip}"
+              puts "#{file}(#{i.next}): #{line.strip}"
             end
           rescue ArgumentError => error
-            @error_logs << "【読み込み失敗】: #{filename} (#{error})"
+            @errors << "【読み込み失敗】: #{file} (#{error})"
             break
           end
         end
       end
       if count.nonzero?
-        @log << {:filename => filename, :count => count}
+        @log << {:file => file, :count => count}
       end
       @counts[:total] += count
     end
 
-    def comment_skip?(filename, line)
+    def comment_skip?(file, line)
       if @options[:all]
         return false
       end
-      if filename.extname.match(/\b(css|scss)\b/)
+      if file.extname.match(/\b(css|scss)\b/)
         return false
       end
-      if filename.extname.match(/\b(el)\b/)
+      if file.extname.match(/\b(el)\b/)
         return line.match(/^\s*;/)
       end
-      if filename.extname == ".rb"
+      if file.extname == ".rb"
         return line.match(/^\s*#/)
       end
       false
@@ -143,11 +142,11 @@ module Safegrep
     def result_display
       unless @log.empty?
         puts
-        puts @log.sort_by{|a|a[:count]}.collect{|e|"#{e[:filename]} (#{e[:count]} hit)"}
+        puts @log.sort_by{|a|a[:count]}.each { |e| "#{e[:file]} (#{e[:count]} hit)" }
       end
-      unless @error_logs.empty?
+      unless @errors.empty?
         puts
-        puts @error_logs.join("\n")
+        puts @errors.join("\n")
       end
       puts
       puts "結果: #{@log.size} 個のファイルを対象に #{@counts[:total]} 個所を検索しました。"
@@ -167,13 +166,13 @@ module Safegrep
           "使い方: #{opts.program_name} [オプション] <検索文字列> <ファイル or ディレクトリ>...\n",
         ].join
         opts.on("オプション")
-        opts.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v }
-        opts.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v| options[:word] = v }
-        opts.on("-f", "--fuzzy", "曖昧検索(#{options[:fuzzy]})") {|v| options[:fuzzy] = v }
-        opts.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})") {|v| options[:escape] = v }
-        opts.on("-a", "コメント行も含める(#{options[:all]})") {|v| options[:all] = v }
-        opts.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})") {|v| options[:toutf8] = v }
-        opts.on("-d", "--debug", "デバッグモード") {|v| options[:debug] = v }
+        opts.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v  }
+        opts.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})")             {|v| options[:word] = v      }
+        opts.on("-f", "--fuzzy", "曖昧検索(#{options[:fuzzy]})")                      {|v| options[:fuzzy] = v     }
+        opts.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})")            {|v| options[:escape] = v    }
+        opts.on("-a", "コメント行も含める(#{options[:all]})")                         {|v| options[:all] = v       }
+        opts.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})") {|v| options[:toutf8] = v    }
+        opts.on("-d", "--debug", "デバッグモード")                                    {|v| options[:debug] = v     }
         opts.on("--help", "このヘルプを表示する") {puts opts; abort}
       end
 
