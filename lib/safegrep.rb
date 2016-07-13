@@ -142,7 +142,7 @@ module Safegrep
     def result_display
       unless @log.empty?
         puts
-        puts @log.sort_by{|a|a[:count]}.each { |e| "#{e[:file]} (#{e[:count]} hit)" }
+        puts @log.sort_by{|a|a[:count]}.collect { |e| "#{e[:file]} (#{e[:count]} hit)" }
       end
       unless @errors.empty?
         puts
