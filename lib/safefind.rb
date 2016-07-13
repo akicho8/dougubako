@@ -84,9 +84,7 @@ module Safefind
       end
     end
   end
-end
 
-module Safefind
   module CLI
     def self.execute(args)
       options = {
@@ -103,16 +101,16 @@ module Safefind
           "使い方: #{Pathname.new($0).basename} [オプション] 検索元 ファイル...\n\n",
         ].join
         opts.on_head("オプション")
-        opts.on("-f", "--fullpath", "検索対象をフルパスにする(または/が含まれていれば有効になる)", TrueClass) {|v| options[:fullpath] = v }
-        opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
-        opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
-        opts.on("-q", "--quiet", "必要な情報のみ表示") {|v| options[:quiet] = v }
-        opts.on("-c", "--copy-to=DIRRECTORY", "ファイルをコピー", String) {|copy_to|options[:copy_to] = Pathname(copy_to).expand_path}
-        opts.on("--file-only", "ファイルのみ", TrueClass) {|v| options[:file_only] = v }
-        opts.on("--rename-from=STRING", "リネーム前", String) {|v| options[:rename_from] = v }
-        opts.on("--rename-to=STRING", "リネーム後", String) {|v| options[:rename_to] = v }
-        opts.on("--delete", "--rm", "ファイル削除", TrueClass) {|v| options[:delete] = v }
-        opts.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
+        opts.on("-f", "--fullpath", "検索対象をフルパスにする(または/が含まれていれば有効になる)", TrueClass)  {|v| options[:fullpath] = v                      }
+        opts.on("-i", "--ignore-case", "大小文字を区別しない")            {|v| options[:ignocase] = v                      }
+        opts.on("-w", "--word-regexp", "単語とみなす")                    {|v| options[:word] = v                          }
+        opts.on("-q", "--quiet", "必要な情報のみ表示")                    {|v| options[:quiet] = v                         }
+        opts.on("-c", "--copy-to=DIRRECTORY", "ファイルをコピー", String) {|v| options[:copy_to] = Pathname(v).expand_path }
+        opts.on("--file-only", "ファイルのみ", TrueClass)                 {|v| options[:file_only] = v                     }
+        opts.on("--rename-from=STRING", "リネーム前", String)             {|v| options[:rename_from] = v                   }
+        opts.on("--rename-to=STRING", "リネーム後", String)               {|v| options[:rename_to] = v                     }
+        opts.on("--delete", "--rm", "ファイル削除", TrueClass)            {|v| options[:delete] = v                        }
+        opts.on("-x", "--exec", "本当に実行する")                         {|v| options[:exec] = v                          }
         opts.on("--help", "このヘルプを表示する") {puts opts; abort}
       end
 

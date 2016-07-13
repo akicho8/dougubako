@@ -51,9 +51,7 @@ module Saferm
       end
     end
   end
-end
 
-module Saferm
   module CLI
     def self.execute(args)
       options = {}

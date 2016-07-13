@@ -38,16 +38,16 @@ module Safefile
 
     def run_dir(files)
       files = files.collect {|e| Pathname.glob(e) }.flatten # SHELLのファイル展開に頼らないで「*.rb」などを展開する
-      files.each do |filename|
-        filename = Pathname(filename).expand_path
-        if @options[:recursive] && filename.directory?
-          run_dir(filename.children)
+      files.each do |e|
+        e = Pathname(e).expand_path
+        if @options[:recursive] && e.directory?
+          run_dir(e.children)
           next
         end
-        if ignore?(filename)
+        if ignore?(e)
           next
         end
-        replace(filename)
+        replace(e)
       end
     end
 
@@ -74,19 +74,19 @@ module Safefile
       end
 
       source = filename.read.public_send(medhod)
-      lines = source.split(/\r\n|\r|\n/).collect do |line|
+      lines = source.split(/\r\n|\r|\n/).collect do |e|
         if @options[:hankaku_space]
-          line = line.gsub(/#{[0x3000].pack('U')}/, " ")
+          e = e.gsub(/#{[0x3000].pack('U')}/, " ")
         end
         if @options[:hankaku]
-          line = line.tr(ZenkakuChars, ReplaceChars)
+          e = e.tr(ZenkakuChars, ReplaceChars)
         end
         if @options[:rstrip]
-          line = line.rstrip
+          e = e.rstrip
         else
-          line = line.gsub(/[\r\n]+$/, "")
+          e = e.gsub(/[\r\n]+$/, "")
         end
-        line
+        e
       end
 
       new_content = lines.join(ret_code)
@@ -150,9 +150,7 @@ module Safefile
       end
     end
   end
-end
 
-module Safefile
   module CLI
     def self.execute(args)
       options = {
@@ -174,21 +172,21 @@ module Safefile
           "使い方: #{opts.program_name} [オプション] ディレクトリ or ファイル...\n",
         ].join
         opts.on("オプション:")
-        opts.on("-x", "--exec", "本当に置換する") {|v| options[:exec] = v }
-        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})") {|v| options[:recursive] = v }
-        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})") {|v| options[:rstrip] = v }
-        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})") {|v| options[:delete_blank_lines] = v }
-        opts.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})") {|v| options[:hankaku] = v }
-        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})") {|v| options[:hankaku_space] = v }
-        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})") {|v| options[:diff] = v }
-        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})") {|v| options[:uniq] = v }
-        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})") {|v| options[:windows] = v }
-        opts.on("-f", "--force", "強制置換する") {|v| options[:force] = v }
+        opts.on("-x", "--exec", "本当に置換する")                                                               {|v| options[:exec] = v                }
+        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})")         {|v| options[:recursive] = v           }
+        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})")                                       {|v| options[:rstrip] = v              }
+        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})") {|v| options[:delete_blank_lines] = v  }
+        opts.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})")                {|v| options[:hankaku] = v             }
+        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")   {|v| options[:hankaku_space] = v       }
+        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")                                           {|v| options[:diff] = v                }
+        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")                         {|v| options[:uniq] = v                }
+        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")                    {|v| options[:windows] = v             }
+        opts.on("-f", "--force", "強制置換する")                                                                {|v| options[:force] = v               }
         # opts.on("-q", "--quiet", "静かにする(#{options[:quiet]})") {|v| options[:quiet] = v }
         opts.on(<<-EOT)
-使用例:
-    1. カレントディレクトリのすべてのファイルを整形する
-      $ #{opts.program_name} .
+        使用例:
+          1. カレントディレクトリのすべてのファイルを整形する
+        $ #{opts.program_name} .
     2. サブディレクトリを含め、diffで整形結果を確認する
       $ #{opts.program_name} -rd .
     3. カレントの *.bat のファイルをWindows用に置換する

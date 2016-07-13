@@ -4,7 +4,7 @@ require "pathname"
 require "optparse"
 require "pp"
 
-module MysqlTools
+module MysqlTool
   class Core
     def self.run(*args)
       new(*args).command_run
@@ -30,16 +30,15 @@ module MysqlTools
 
     # m table myapp users
     def table
-      table_name = @args[0]
-      matched_db_list.each {|db| read_run("mysql -u root -e \"show columns from #{table_name}\" #{db}") }
+      matched_db_list.each {|db| read_run("mysql -u root -e \"show columns from #{@args.first}\" #{db}") }
     end
 
     def create_db
-      _create_db(@args[0] || "myapp_development")
+      _create_db(@args.first || "myapp_development")
     end
 
     def create_db_all
-      db_prefix = @args[0] || "myapp"
+      db_prefix = @args.first || "myapp"
       ["production", "development", "test"].each do |env|
         _create_db("#{db_prefix}_#{env}")
       end
@@ -129,5 +128,5 @@ EOT
 end
 
 if $0 == __FILE__
-  MysqlTools::CLI.execute(ARGV)
+  MysqlTool::CLI.execute(ARGV)
 end

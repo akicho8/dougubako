@@ -29,7 +29,7 @@ class Safekill
   end
 
   def ps_aux
-    lines = `ps aux`.lines.find_all {|line| line.match(@regexp) }
+    lines = `ps aux`.lines.find_all {|e| e.match(@regexp) }
     lines.reject!{|line|line.match(/^\w+\s+#{Process.pid}\b/)} # 自分を除去
     if lines.empty?
       puts "なし"

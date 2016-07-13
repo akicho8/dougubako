@@ -58,7 +58,7 @@ module Saferen
     end
 
     def execute(files)
-      files.each{|fname|
+      files.each do |fname|
         original_basename = fname.basename.to_s
 
         original_basename = original_basename.toutf8
@@ -99,7 +99,7 @@ module Saferen
           end
           puts "#{fname}:【#{original_basename.strip}】→【#{new_basename.strip}】 #{result}".strip
         end
-      }
+      end
     end
 
     def vc_mv_command(fname, new_fname)

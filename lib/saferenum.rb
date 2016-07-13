@@ -80,7 +80,7 @@ module Saferenum
           FileUtils.mv(files, tmpdir, :noop => @base.options[:noop], :verbose => @base.options[:verbose])
         end
 
-        files.each_with_index{|file, index|
+        files.each_with_index{|file, i|
           if @base.options[:reject_basename]
             # "0123_foo.txt" から ".txt" の部分を取得
             rest = file.extname
@@ -90,7 +90,7 @@ module Saferenum
             rest = md[:rest]
           end
           # "0100" + "_foo.txt" または "0100" + ".txt" となる
-          renamed_file = file.dirname + [number_format(files, index), rest].join
+          renamed_file = file.dirname + [number_format(files, i), rest].join
           mark = " "
           diff = false
           if file.basename.to_s != renamed_file.basename.to_s
@@ -98,7 +98,7 @@ module Saferenum
             diff = true
             @base.counts[:diff] += 1
           end
-          index_str = "[#{index.next.to_s.rjust(files.size.to_s.size)}/#{files.size}]"
+          index_str = "[#{i.next.to_s.rjust(files.size.to_s.size)}/#{files.size}]"
           if diff || @base.options[:verbose]
             puts "  #{mark} #{index_str} #{file.basename} => #{renamed_file.basename}"
           end
