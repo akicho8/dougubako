@@ -3,6 +3,7 @@
 
 require "optparse"
 require "active_support/core_ext/string/inflections"
+require "active_support/core_ext/string/filters"
 require_relative 'file_ignore'
 
 module Safegrep
@@ -109,7 +110,11 @@ module Safegrep
                 count += 1
                 "【#{$&}】"
               }
-              puts "#{file}(#{i.next}): #{line.strip}"
+              s = line.strip
+              if file.to_s.match(/\.json\z/)
+                s = s.truncate(256)
+              end
+              puts "#{file}(#{i.next}): #{s}"
             end
           rescue ArgumentError => error
             @errors << "【読み込み失敗】: #{file} (#{error})"
