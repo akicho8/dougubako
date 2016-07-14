@@ -48,9 +48,9 @@ module Safegrep
       end
 
       if @options[:fuzzy]
-        @str = @str.sub(/key_type\z/, '')
-        @str = @str.sub(/type_key\z/, '')
-        @str = @str.sub(/(key|type)\z/, '')
+        @str = @str.sub(/keys?_types?\z/, '')
+        @str = @str.sub(/types?_keys?\z/, '')
+        @str = @str.sub(/(key|type)s?\z/, '')
         @str = @str.sub(/\A_*(.*?)_*\z/, '\1')
 
         @str = Regexp.union(*[
