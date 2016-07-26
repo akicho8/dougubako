@@ -48,10 +48,11 @@ module Safegrep
       end
 
       if @options[:fuzzy]
-        @str = @str.sub(/keys?_types?\z/, '')
-        @str = @str.sub(/types?_keys?\z/, '')
-        @str = @str.sub(/(key|type)s?\z/, '')
-        @str = @str.sub(/\A_*(.*?)_*\z/, '\1')
+        @str = @str.sub(/_?info\z/i, '')
+        @str = @str.sub(/keys?_types?\z/i, '')
+        @str = @str.sub(/types?_keys?\z/i, '')
+        @str = @str.sub(/(key|type)s?\z/i, '')
+        @str = @str.sub(/\A_*(.*?)_*\z/i, '\1')
 
         @str = Regexp.union(*[
             /#{@str}/i,
@@ -110,7 +111,7 @@ module Safegrep
                 count += 1
                 "【#{$&}】"
               }
-              s = line.strip
+              s = line.squish
               if file.to_s.match(/\.json\z/)
                 s = s.truncate(256)
               end

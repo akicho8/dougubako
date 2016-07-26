@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # ファイル整形
 
+require "bundler/setup"
+
 require "pathname"
 require "optparse"
 require "diff/lcs"
