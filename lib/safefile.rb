@@ -76,7 +76,7 @@ module Safefile
       end
 
       source = filename.read.public_send(medhod)
-      lines = source.split(/\r\n|\r|\n/).collect do |e|
+      lines = source.split(/\R/).collect do |e|
         if @options[:hankaku_space]
           e = e.gsub(/#{[0x3000].pack('U')}/, " ")
         end
@@ -86,7 +86,7 @@ module Safefile
         if @options[:rstrip]
           e = e.rstrip
         else
-          e = e.gsub(/[\r\n]+$/, "")
+          e = e.gsub(/\R+$/, "")
         end
         e
       end
