@@ -10,8 +10,8 @@ require_relative "file_ignore"
 
 module Safefile
   VERSION = "1.0.0"
-  ZenkakuChars = "ａ-ｚＡ-Ｚ０-９（）／＊"
-  ReplaceChars = "a-zA-Z0-9()/*"
+  ZenkakuChars = "ａ-ｚＡ-Ｚ０-９（）／＊．"
+  ReplaceChars = "a-zA-Z0-9()/*."
 
   class Core
     def self.run(*args, &block)
