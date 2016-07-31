@@ -18,18 +18,19 @@ module Safefile
       new(*args, &block).run
     end
 
+    attr_accessor :options, :counts
+
     def initialize(files, options = {}, &block)
       @files = files
+
       @options = {
       }.merge(options)
-      if block_given?
-        yield self
-      end
+
       @counts = Hash.new(0)
     end
 
     def run
-      run_dir(@files)
+      dir_walk(@files)
       puts "#{@counts[:file]} 個のファイルの中から #{@counts[:success]} 個を置換しました。総diffは #{@counts[:diff]} 行です。"
       unless @options[:exec]
         puts "本当に置換するには -x オプションを付けてください。"
@@ -38,117 +39,140 @@ module Safefile
 
     private
 
-    def run_dir(files)
+    def dir_walk(files)
       files = files.collect {|e| Pathname.glob(e) }.flatten # SHELLのファイル展開に頼らないで「*.rb」などを展開する
       files.each do |e|
-        e = Pathname(e).expand_path
-        if @options[:recursive] && e.directory?
-          run_dir(e.children)
+        e = e.expand_path
+        if e.directory?
+          if @options[:recursive]
+            dir_walk(e.children)
+          end
           next
         end
-        if ignore?(e)
+        replacer = Replacer.new(self, e)
+        if replacer.ignore?
           next
         end
-        replace(e)
+        replacer.replace
       end
     end
 
-    def ignore?(filename)
-      if FileIgnore.ignore?(filename)
-        return true
-      end
-      if filename.basename.to_s.match(/\.min\./)
-        return true
-      end
-      if ["development_structure.sql", "schema.rb"].include?(filename.basename.to_s)
-        return true
-      end
-      false
-    end
-
-    def replace(filename)
-      if @options[:windows]
-        medhod = :tosjis
-        ret_code = "\r\n"
-      else
-        medhod = :toutf8
-        ret_code = "\n"
+    class Replacer
+      def initialize(base, current_file)
+        @base = base
+        @current_file = current_file
       end
 
-      source = filename.read.public_send(medhod)
-      lines = source.split(/\R/).collect do |e|
-        if @options[:hankaku_space]
-          e = e.gsub(/#{[0x3000].pack('U')}/, " ")
+      def ignore?
+        if FileIgnore.ignore?(@current_file)
+          return true
         end
-        if @options[:hankaku]
-          e = e.tr(ZenkakuChars, ReplaceChars)
+        if @current_file.basename.to_s.match(/\.min\./)
+          return true
         end
-        if @options[:rstrip]
-          e = e.rstrip
-        else
-          e = e.gsub(/\R+$/, "")
+        if ["development_structure.sql", "schema.rb"].include?(@current_file.basename.to_s)
+          return true
         end
-        e
+        false
       end
 
-      new_content = lines.join(ret_code)
+      def replace
+        @source = @current_file.read.public_send(toxxxx)
+        @body = @source.dup
 
-      if @options[:delete_blank_lines]
-        # 2行以上の空行を1行にする
-        new_content = new_content.gsub(/(#{ret_code}){2,}/, '\1\1')
-      end
+        @body = @body.split(/\R/).collect { |e|
+          if @base.options[:hankaku_space]
+            e.gsub!(/#{[0x3000].pack('U')}/, " ")
+          end
+          if @base.options[:hankaku]
+            e.tr!(ZenkakuChars, ReplaceChars)
+          end
+          if @base.options[:rstrip]
+            e.rstrip!
+          else
+            e.gsub!(/\R+$/, "")
+          end
+          e
+        }.join(enter_code)
 
-      # 最後の空行を取る
-      new_content = new_content.rstrip + ret_code
+        if @base.options[:delete_blank_lines]
+          # 2行以上の空行を1行にする
+          @body = @body.gsub(/(#{enter_code}){2,}/, '\1\1')
+        end
 
-      # 固まっている重複行を一つにする
-      #
-      #   b a a b b a => b a b a
-      #
-      if @options[:uniq]
-        lines = new_content.lines.to_a
-        lines.each_with_index do |line, i|
-          if line == lines[i.next]
-            lines[i] = nil
+        # 先頭と最後の空行を取る
+        @body = @body.strip + enter_code
+
+        # 固まっている重複行を一つにする
+        #
+        #   b a a b b a => b a b a
+        #
+        if @base.options[:uniq]
+          lines = @body.lines.to_a
+          lines.each_with_index do |e, i|
+            if e == lines[i.next]
+              lines[i] = nil
+            end
+          end
+          @body = lines.compact.join
+        end
+
+        # 最後に内容が空に見えるなら完全に空にする
+        @body.gsub!(/\A[[:space:]]*\z/, "")
+
+        mark = nil
+        desc = nil
+        @base.counts[:diff] += diffs.count
+        @base.counts[:file] += 1
+
+        if diffs.count >= 1 || @base.options[:force]
+          @base.counts[:success] += 1
+          mark = "U"
+          desc = "(#{diffs.count} diffs)"
+          if @base.options[:exec]
+            @current_file.write(@body)
           end
         end
-        new_content = lines.compact.join
-      end
 
-      # コンテンツが改行しかないのなら空にする
-      if new_content.match(/\A#{ret_code}\z/)
-        new_content = ""
-      end
+        if mark
+          puts "#{mark} #{@current_file} #{desc}".rstrip
+        end
 
-      mark = nil
-      desc = nil
-      count = Diff::LCS.sdiff(source.lines.to_a, new_content.lines.to_a).count {|e| e.action == "!" }
-      @counts[:diff] += count
-      @counts[:file] += 1
-      if count >= 1 || @options[:force]
-        @counts[:success] += 1
-        mark = "U"
-        desc = "(#{count} diffs)"
-        if @options[:exec]
-          filename.write(new_content)
+        if @base.options[:diff]
+          diff_display
         end
       end
-      if mark
-        puts "#{mark} #{filename} #{desc}".rstrip
-      end
-      if @options[:diff]
-        diff_display(filename, source, new_content)
-      end
-    end
 
-    def diff_display(filename, old_content, new_content)
-      diffs = Diff::LCS.sdiff(old_content.lines.to_a, new_content.lines.to_a) # すべての行のdiffをとる
-      diffs = diffs.find_all {|e| e.old_element != e.new_element }               # 異なる行だけに絞る
-      diffs.each_with_index do |diff, index|
-        puts "-------------------------------------------------------------------------------- [#{index.next}/#{diffs.size}]"
-        puts "#{filename}:#{diff.old_position.next}: - #{diff.old_element.lstrip}" if diff.old_element
-        puts "#{filename}:#{diff.new_position.next}: + #{diff.new_element.lstrip}" if diff.new_element
-        puts "--------------------------------------------------------------------------------" if diffs.last == diff
+      def diffs
+        @diffs ||= Diff::LCS.sdiff(@source.lines, @body.lines).find_all do |e|
+          # e.action == "!" ではダメ
+          e.old_element != e.new_element
+        end
+      end
+
+      def diff_display
+        diffs.each_with_index do |e, i|
+          puts "-------------------------------------------------------------------------------- [#{i.next}/#{diffs.size}]"
+          puts "#{@current_file}:#{e.old_position.next}: - #{e.old_element.inspect}" if e.old_element
+          puts "#{@current_file}:#{e.new_position.next}: + #{e.new_element.inspect}" if e.new_element
+          puts "--------------------------------------------------------------------------------" if diffs.last == e
+        end
+      end
+
+      def toxxxx
+        if @base.options[:windows]
+          :tosjis
+        else
+          :toutf8
+        end
+      end
+
+      def enter_code
+        if @base.options[:windows]
+          "\r\n"
+        else
+          "\n"
+        end
       end
     end
   end
@@ -161,7 +185,6 @@ module Safefile
         :hankaku            => true,
         :diff               => false,
         :uniq               => false,
-        # :quiet            => false,
         :windows            => false,
         :rstrip             => true,
         :recursive          => false,
@@ -184,7 +207,6 @@ module Safefile
         opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")                         {|v| options[:uniq] = v                }
         opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")                    {|v| options[:windows] = v             }
         opts.on("-f", "--force", "強制置換する")                                                                {|v| options[:force] = v               }
-        # opts.on("-q", "--quiet", "静かにする(#{options[:quiet]})") {|v| options[:quiet] = v }
         opts.on(<<-EOT)
         使用例:
           1. カレントディレクトリのすべてのファイルを整形する
