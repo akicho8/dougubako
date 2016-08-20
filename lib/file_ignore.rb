@@ -79,7 +79,7 @@ module FileIgnore
       /\.(sql|sqlite3|cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|\.del-.*)\z/,
       /\.(au|pdf|pptx|fla|flv|avi|ttf|mp3|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xlsx?|ppt|ico|pid|tmp)\z/i,
       # 単語
-      /\b(RDEFSX|RDEFS|RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/i,
+      /\b(RDEFSX|RDEFS|RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/, # /i だと /tags/ が除外されるので
       /\b(cache|password_dic|coverage|public\/assets)\b/,
       /\b(doc\/app|coverage|pkg|ruby_sess|yardoc|rdoc)\b/,
       /tmp.*meta_request.*json\z/, # rails tmp/data/meta_request/91f33f2a0bbf97d42fc1b1c95915fc91.json
