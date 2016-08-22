@@ -7,7 +7,11 @@ module FileIgnore
 
   # 検索・置換対象から外すか？
   def ignore?(filepath, options = {})
-    filepath = Pathname(filepath).expand_path
+    begin
+      filepath = Pathname(filepath).expand_path
+    rescue ArgumentError        # Macの日本語のファイルを参照したときエラーになる場合があるため
+      return true
+    end
 
     # シンボリックリンクを展開してはいけない。シンボリックリンクを修正するとシン
     # ボリックリンクではなく本当のファイルになってしまう。つまりファイルが複数でき
