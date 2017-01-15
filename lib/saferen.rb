@@ -46,11 +46,11 @@ module Saferen
 
     def run
       # file
-      @target_files = @targets.find_all{|f|f.file?}
+      @target_files = @targets.find_all(&:file?)
       execute(@target_files)
 
       # directory
-      @target_dirs = @targets.find_all{|f|f.directory?}
+      @target_dirs = @targets.find_all(&:directory?)
       @target_dirs = @target_dirs.sort_by{|v|v.to_s.count(File::SEPARATOR)}.reverse
       execute(@target_dirs)
 
