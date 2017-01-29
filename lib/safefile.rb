@@ -5,6 +5,7 @@ require "pathname"
 require "optparse"
 require "diff/lcs"
 require_relative "file_ignore"
+require_relative "maru_replacer"
 
 module Safefile
   ZENKAKU_CHARS = "ａ-ｚＡ-Ｚ０-９（）／＊．"
@@ -83,6 +84,9 @@ module Safefile
           end
           if @base.options[:hankaku]
             e.tr!(ZENKAKU_CHARS, REPLACE_CHARS)
+          end
+          if @base.options[:maru]
+            e = maru_replacer.replace(e)
           end
           if @base.options[:rstrip]
             e.rstrip!
@@ -170,6 +174,10 @@ module Safefile
           "\n"
         end
       end
+
+      def maru_replacer
+        @maru_replacer ||= MaruReplacer.new
+      end
     end
   end
 
@@ -183,6 +191,7 @@ module Safefile
         :uniq               => false,
         :windows            => false,
         :rstrip             => true,
+        :maru               => true,
         :recursive          => false,
       }
 
@@ -202,6 +211,7 @@ module Safefile
         opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")
         opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")
         opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")
+        opts.on("-m", "--[no-]maru", "丸数字を(1)形式に変換する(#{options[:maru]})")
         opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")
         opts.on("-f", "--force", "強制置換する")
         opts.separator ""
