@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
 # ファイル整形
 
 require "bundler/setup"
-
 require "pathname"
 require "optparse"
 require "diff/lcs"
 require_relative "file_ignore"
 
 module Safefile
-  VERSION = "1.0.0"
-  ZenkakuChars = "ａ-ｚＡ-Ｚ０-９（）／＊．"
-  ReplaceChars = "a-zA-Z0-9()/*."
+  ZENKAKU_CHARS = "ａ-ｚＡ-Ｚ０-９（）／＊．"
+  REPLACE_CHARS = "a-zA-Z0-9()/*."
 
   class Core
     def self.run(*args, &block)
@@ -40,7 +37,7 @@ module Safefile
     private
 
     def dir_walk(files)
-      files = files.collect {|e| Pathname.glob(e) }.flatten # SHELLのファイル展開に頼らないで「*.rb」などを展開する
+      files = files.collect { |e| Pathname.glob(e) }.flatten # SHELLのファイル展開に頼らないで「*.rb」などを展開する
       files.each do |e|
         e = e.expand_path
         if e.directory?
@@ -77,7 +74,7 @@ module Safefile
       end
 
       def replace
-        @source = @current_file.read.public_send(toxxxx)
+        @source = @current_file.read.public_send("to#{encoding_sym_name}")
         @body = @source.dup
 
         @body = @body.split(/\R/).collect { |e|
@@ -85,7 +82,7 @@ module Safefile
             e.gsub!(/#{[0x3000].pack('U')}/, " ")
           end
           if @base.options[:hankaku]
-            e.tr!(ZenkakuChars, ReplaceChars)
+            e.tr!(ZENKAKU_CHARS, REPLACE_CHARS)
           end
           if @base.options[:rstrip]
             e.rstrip!
@@ -145,8 +142,7 @@ module Safefile
 
       def diffs
         @diffs ||= Diff::LCS.sdiff(@source.lines, @body.lines).find_all do |e|
-          # e.action == "!" ではダメ
-          e.old_element != e.new_element
+          e.old_element != e.new_element # e.action == "!" では厳密な比較ができない
         end
       end
 
@@ -159,11 +155,11 @@ module Safefile
         end
       end
 
-      def toxxxx
+      def encoding_sym_name
         if @base.options[:windows]
-          :tosjis
+          :sjis
         else
-          :toutf8
+          :utf8
         end
       end
 
@@ -191,25 +187,27 @@ module Safefile
       }
 
       oparser = OptionParser.new do |opts|
-        opts.version = VERSION
+        opts.version = "1.0.0"
         opts.banner = [
           "ファイル整形 #{opts.ver}\n",
           "使い方: #{opts.program_name} [オプション] ディレクトリ or ファイル...\n",
         ].join
-        opts.on("オプション:")
-        opts.on("-x", "--exec", "本当に置換する")                                                               {|v| options[:exec] = v                }
-        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})")         {|v| options[:recursive] = v           }
-        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})")                                       {|v| options[:rstrip] = v              }
-        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})") {|v| options[:delete_blank_lines] = v  }
-        opts.on("-z", "--[no-]hankaku", "「#{ZenkakuChars}」を半角にする(#{options[:hankaku]})")                {|v| options[:hankaku] = v             }
-        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")   {|v| options[:hankaku_space] = v       }
-        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")                                           {|v| options[:diff] = v                }
-        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")                         {|v| options[:uniq] = v                }
-        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")                    {|v| options[:windows] = v             }
-        opts.on("-f", "--force", "強制置換する")                                                                {|v| options[:force] = v               }
+        opts.separator ""
+        opts.separator "オプション:"
+        opts.on("-x", "--exec", "本当に置換する")
+        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})")
+        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})")
+        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})")
+        opts.on("-z", "--[no-]hankaku", "「#{ZENKAKU_CHARS}」を半角にする(#{options[:hankaku]})")
+        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")
+        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")
+        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")
+        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")
+        opts.on("-f", "--force", "強制置換する")
+        opts.separator ""
+        opts.separator "使用例:"
         opts.on(<<-EOT)
-        使用例:
-          1. カレントディレクトリのすべてのファイルを整形する
+    1. カレントディレクトリのすべてのファイルを整形する
         $ #{opts.program_name} .
     2. サブディレクトリを含め、diffで整形結果を確認する
       $ #{opts.program_name} -rd .
@@ -221,7 +219,7 @@ EOT
       end
 
       begin
-        oparser.parse!(args)
+        oparser.parse!(args, :into => options)
       rescue OptionParser::InvalidOption => error
         puts error
         abort
