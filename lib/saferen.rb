@@ -73,21 +73,13 @@ module Saferen
           begin
             new_fname = fname.dirname + new_basename
             ret = 0
-            if command = vc_mv_command(fname, new_fname)
-              puts command
-            end
             # p new_fname
             if new_fname.exist?
               puts "CollisionError: #{new_fname}"
               @counts[:collision] += 1
             end
             if @options[:exec]
-              if command
-                $defout << `#{command}`
-                ret = 0
-              else
-                ret = fname.rename(new_fname)
-              end
+              ret = fname.rename(new_fname)
             end
             if ret == 0
               result = "成功"
@@ -99,12 +91,6 @@ module Saferen
           end
           puts "#{fname}:【#{original_basename.strip}】→【#{new_basename.strip}】 #{result}".strip
         end
-      end
-    end
-
-    def vc_mv_command(fname, new_fname)
-      if @options[:git_mv]
-        "git mv '#{fname}' '#{new_fname}'"
       end
     end
 
@@ -134,7 +120,6 @@ module Saferen
         opts.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
         opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
         opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
-        opts.on("--git", "git mv コマンドでリネーム") {|v| options[:git_mv] = v }
       end
 
       begin
