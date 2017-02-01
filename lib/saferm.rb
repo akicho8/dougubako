@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ファイル削除ツール
 
 require "pathname"
@@ -16,10 +15,10 @@ module Saferm
       @options = options
       @target_dirs = target_dirs
       regexp_option = 0
-      if @options[:ignocase]
+      if @options[:"ignore-case"]
         regexp_option |= Regexp::IGNORECASE
       end
-      if options[:word]
+      if options[:"word-regexp"]
         src = "[\\b_]#{src}[\\b_]"
       end
       @src_regexp = Regexp.compile(src, regexp_option)
@@ -30,14 +29,13 @@ module Saferm
     end
 
     def run
-      @target_dirs.each do |target_dir|
-        target_dir = Pathname(target_dir)
-        target_dir.find do |fname|
-          if FileIgnore.ignore?(fname)
+      @target_dirs.each do |e|
+        Pathname(e).find do |e|
+          if FileIgnore.ignore?(e)
             next
           end
-          if @src_regexp.match(fname.basename.to_s)
-            FileUtils.rm_rf(fname.expand_path.to_s, {:noop => !@options[:exec], :verbose => true})
+          if @src_regexp.match(e.basename.to_s)
+            FileUtils.rm_rf(e.expand_path.to_s, {:noop => !@options[:exec], :verbose => true})
           end
           @count += 1
         end
@@ -61,14 +59,14 @@ module Saferm
           "使い方: #{Pathname.new($0).basename} [オプション] 検索元 ファイル...\n\n",
         ].join
         opts.on_head("オプション")
-        opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
-        opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
-        opts.on("-x", "--exec", "本当に実行する") {|v| options[:exec] = v }
-        opts.on("--help", "このヘルプを表示する") {puts opts; abort}
+        opts.on("-i", "--ignore-case", "大小文字を区別しない")
+        opts.on("-w", "--word-regexp", "単語とみなす")
+        opts.on("-x", "--exec", "本当に実行する")
+        opts.on("--help", "このヘルプを表示する") { puts opts; abort }
       end
 
       begin
-        oparser.parse!(args)
+        oparser.parse!(args, :into => options)
       rescue OptionParser::InvalidOption
         puts "オプションが間違っています。"
         abort
