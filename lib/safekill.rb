@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# プロセスKILL
-
 class Safekill
   def initialize(*options)
     @options = options
@@ -36,8 +33,10 @@ class Safekill
       return []
     end
     puts lines
-    process_ids = lines.collect{|e|e.match(/^\S+\s+(\d+)/).captures.first.to_i}.sort.reverse
-    process_ids - [Process.pid] # 念のために自分を除去
+    process_ids = lines.collect { |e|
+      e.match(/^\S+\s+(\d+)/).captures.first.to_i
+    }.sort.reverse
+    process_ids - [Process.pid] # 自分を除去
   end
 
 end
