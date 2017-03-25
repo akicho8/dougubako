@@ -96,6 +96,7 @@ module FileIgnore
       /(stylesheets|javascripts|assets)\/_+cache/,
       # 例外的に
       /テキストファイル|版元さんからの画像/,
+      /\b(node_modules)\b/,
       /\b(_sound_data)\b/,
       /\b(japanese\.txt)\z/,
       /tmp\/(deploy|rubycritic)/,
