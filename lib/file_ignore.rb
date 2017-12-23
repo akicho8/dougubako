@@ -95,7 +95,7 @@ module FileIgnore
       /\b(min)\b.*\.(js|css)\z/,
       /(stylesheets|javascripts|assets)\/_+cache/,
       # 例外的に
-      /テキストファイル|版元さんからの画像/,
+      /テキストファイル|版元さんからの画像|my_doc/,
       /\b(node_modules)\b/,
       /\b(public\/packs)\b/,
       /\b(_sound_data)\b/,

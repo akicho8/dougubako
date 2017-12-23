@@ -203,16 +203,16 @@ module Safefile
         ].join
         opts.separator ""
         opts.separator "オプション:"
-        opts.on("-x", "--exec", "本当に置換する")
-        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})")
-        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})")
-        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})")
-        opts.on("-z", "--[no-]hankaku", "「#{ZENKAKU_CHARS}」を半角にする(#{options[:hankaku]})")
-        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")
-        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")
-        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")
-        opts.on("-m", "--[no-]maru", "丸数字を(1)形式に変換する(#{options[:maru]})")
-        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")
+        opts.on("-x", "--exec", "本当に置換する")                                                               { |v| options[:exec] = v                }
+        opts.on("-r", "--recursive", "サブディレクトリも対象にする(デフォルト:#{options[:recursive]})")         { |v| options[:recursive] = v           }
+        opts.on("-s", "--[no-]rstrip", "rstripする(#{options[:rstrip]})")                                       { |v| options[:rstrip] = v              }
+        opts.on("-b", "--[no-]delete-blank-lines", "2行以上の空行を1行にする(#{options[:delete_blank_lines]})") { |v| options[:delete_blank_lines] = v  }
+        opts.on("-z", "--[no-]hankaku", "「#{ZENKAKU_CHARS}」を半角にする(#{options[:hankaku]})")               { |v| options[:hankaku] = v             }
+        opts.on("-Z", "--[no-]hankaku-space", "全角スペースを半角スペースにする(#{options[:hankaku_space]})")   { |v| options[:hankaku_space] = v       }
+        opts.on("-d", "--[no-]diff", "diffの表示(#{options[:diff]})")                                           { |v| options[:diff] = v                }
+        opts.on("-u", "--[no-]uniq", "同じ行が続く場合は一行にする(#{options[:uniq]})")                         { |v| options[:uniq] = v                }
+        opts.on("-m", "--[no-]maru", "丸数字を(1)形式に変換する(#{options[:maru]})")                            { |v| options[:maru] = v                }
+        opts.on("-w", "--windows", "SHIFT-JISで改行も CR + LF にする(#{options[:windows]})")                    { |v| options[:windows] = v             }
         opts.on("-f", "--force", "強制置換する")
         opts.separator ""
         opts.separator "使用例:"
@@ -229,7 +229,7 @@ EOT
       end
 
       begin
-        oparser.parse!(args, :into => options)
+        oparser.parse!(args)
       rescue OptionParser::InvalidOption => error
         puts error
         abort
