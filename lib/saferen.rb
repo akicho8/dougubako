@@ -79,6 +79,7 @@ module Saferen
               @counts[:collision] += 1
             end
             if @options[:exec]
+              new_fname.dirname.mkpath
               ret = fname.rename(new_fname)
             end
             if ret == 0
