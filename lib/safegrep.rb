@@ -67,7 +67,7 @@ module Safegrep
       end
       @str = Regexp.compile(@str, option)
 
-      puts "検索言:【#{@str.source}】(大小文字を区別#{@str.casefold? ? "しない" : "する"})"
+      puts "検索語:【#{@str.source}】(大小文字を区別#{@str.casefold? ? "しない" : "する"})"
     end
 
     def run
