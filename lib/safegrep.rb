@@ -142,6 +142,9 @@ module Safegrep
       if file.extname == ".rb"
         return line.match(/^\s*#/)
       end
+      if file.extname.match(/\b(vue|js)/)
+        return line.match(%r{^\s*//})
+      end
       false
     end
 
