@@ -83,7 +83,7 @@ module Saferen
             end
             if @options[:exec]
               new_fname.dirname.mkpath
-              # ret = fname.rename(new_fname)
+              ret = fname.rename(new_fname)
             end
             if ret == 0
               result = "成功"
