@@ -12,7 +12,7 @@ module Saferen
       new(*args, &block).run
     end
 
-    def initialize(source_regexp, dest_text, files, options)
+    def initialize(source_regexp, dest_text, files, **options)
       @source_regexp = source_regexp
       @dest_text = dest_text
       @files = files
@@ -33,10 +33,13 @@ module Saferen
       puts "置換情報:【#{@source_regexp.source}】=>【#{@dest_text}】(大小文字を区別#{@source_regexp.casefold? ? "しない" : "する"})"
 
       @targets = []
+
       @files.each do |file|
         file = Pathname(file).expand_path
         file.find do |f|
-          next if f.to_s.match(/(\.(svn|git)|\bcvs|\brcs)\b/i)
+          if f.to_s.match(/(\.(svn|git)|\b(cvs)|\b(rcs))\b/i)
+            next
+          end
           @targets << f
         end
       end
@@ -80,7 +83,7 @@ module Saferen
             end
             if @options[:exec]
               new_fname.dirname.mkpath
-              ret = fname.rename(new_fname)
+              # ret = fname.rename(new_fname)
             end
             if ret == 0
               result = "成功"
@@ -111,16 +114,16 @@ module Saferen
     def self.execute(args)
       options = {}
 
-      oparser = OptionParser.new do |opts|
-        opts.version = VERSION
-        opts.banner = [
-          "ファイル・デイレクトリ名置換 #{opts.ver}\n",
-          "使い方: #{opts.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
+      oparser = OptionParser.new do |o|
+        o.version = VERSION
+        o.banner = [
+          "ファイル・デイレクトリ名置換 #{o.ver}\n",
+          "使い方: #{o.program_name} [オプション] <置換元> <置換後> <ファイル or ディレクトリ>...\n",
         ].join
-        opts.on_head("オプション:")
-        opts.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
-        opts.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
-        opts.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
+        o.on_head("オプション:")
+        o.on("-x", "--exec", "実際に置換する") {|v| options[:exec] = v }
+        o.on("-i", "--ignore-case", "大小文字を区別しない") {|v| options[:ignocase] = v }
+        o.on("-w", "--word-regexp", "単語とみなす") {|v| options[:word] = v }
       end
 
       begin

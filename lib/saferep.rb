@@ -108,7 +108,13 @@ module Saferep
       return false if @options[:all]
       resp = nil
       resp ||= FileIgnore.ignore?(fname)
-      resp ||= fname.basename.to_s.match(/(ChangeLog|\.diff)$/i)
+      resp ||= fname.basename.to_s.match(/(ChangeLog|\.diff)\z/i)
+      unless resp
+        # if fname.to_s.match(/(\.css)\z/i)
+        #   fname.read.size >=
+        # end
+      end
+      resp
     end
 
     def replace(fname)
