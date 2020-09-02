@@ -59,8 +59,8 @@ module FileIgnore
       end
     end
 
-    # バイナリはダメ
-    if filepath.ftype == "file"
+    # バイナリはダメ ← 絵文字が含まれていると除外されてしまうため
+    if filepath.ftype == "file" && filepath.extname != ".rb"
       if NKF.guess(filepath.read) == NKF::BINARY
         return true
       end
@@ -105,6 +105,8 @@ module FileIgnore
       # npm でビルドした docs
       /\b(docs\/static)\b/,
       /\b(build\/static)\b/,
+      # nuxt
+      /\.nuxt/,
     ]
   end
 end
