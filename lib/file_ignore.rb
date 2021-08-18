@@ -81,7 +81,7 @@ module FileIgnore
     [
       # 拡張子
       /\.(js\.map|sql|sqlite3|cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|tga|\.del-.*)\z/,
-      /\.(au|pdf|pptx|fla|flv|avi|ttf|mp3|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xlsx?|ppt|ico|pid|tmp|sf2)\z/i,
+      /\.(au|pdf|pptx|fla|flv|avi|ttf|mp3|m4a|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xlsx?|ppt|ico|pid|tmp|sf2)\z/i,
       # 単語
       /\b(BREAKING_CHANGES|RDEFSX|RDEFS|RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/, # /i だと /tags/ が除外されるので
       /\b(cache|password_dic|coverage|public\/assets)\b/,
@@ -108,6 +108,8 @@ module FileIgnore
       # nuxt
       /\.nuxt/,
       /_nuxt/,
+      /mate3_5_7_9_11/,
+      /miniprofiler/,
     ]
   end
 end
