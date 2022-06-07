@@ -72,7 +72,11 @@ module Saferep
       catch(:exit) do
         @files.each do |filepath|
           Pathname(filepath).find do |fname|
-            next if fname.directory?
+            if fname.directory?
+              if fname.basename.to_s.start_with?(".") || fname.basename.to_s.match?(/\b(?:log)\b/)
+                Find.prune
+              end
+            end
             @counts[:fetch] += 1
             if @options[:debug]
               puts "find: #{fname.expand_path}"
