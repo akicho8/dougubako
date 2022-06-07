@@ -106,6 +106,10 @@ module FileIgnore
       # npm でビルドした docs
       /\b(docs\/static)\b/,
       /\b(build\/static)\b/,
+
+      # Rust
+      /\b(target\/(debug|release|vcpkg))\b/,
+
       # nuxt
       /\.nuxt/,
       /_nuxt/,
