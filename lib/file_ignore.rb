@@ -116,6 +116,8 @@ module FileIgnore
       /mate3_5_7_9_11/,
       /miniprofiler/,
       /\.(band)\b/,                 # Garageband プロジェクトディレクトリ
+
+      %r{/canon_cop/(?:fairy|log|trash|upload_files)/},
     ]
   end
 end
