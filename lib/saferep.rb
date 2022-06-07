@@ -73,7 +73,9 @@ module Saferep
         @files.each do |filepath|
           Pathname(filepath).find do |fname|
             if fname.directory?
-              if fname.basename.to_s.start_with?(".") || fname.basename.to_s.match?(/\b(?:log)\b/)
+              # .git または .bin などをはぶく
+              # log tmp もはぶく
+              if fname.basename.to_s.match?(/^\.\w+/) || fname.basename.to_s.match?(/\b(?:log|tmp)\b/)
                 Find.prune
               end
             end
