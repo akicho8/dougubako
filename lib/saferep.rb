@@ -75,8 +75,13 @@ module Saferep
             if fname.directory?
               # .git または .bin などをはぶく
               # log tmp もはぶく
-              if fname.basename.to_s.match?(/^\.\w+/) || fname.basename.to_s.match?(/\b(?:log|tmp)\b/)
-                Find.prune
+              s = fname.basename.to_s
+              if s == ".vuepress"
+                # ok
+              else
+                if s.match(/^\.\w+/) || s.match(/\b(?:log|tmp)\b/)
+                  Find.prune
+                end
               end
             end
             @counts[:fetch] += 1
