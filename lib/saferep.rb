@@ -76,6 +76,9 @@ module Saferep
               # .git または .bin などをはぶく
               # log tmp もはぶく
               s = fname.basename.to_s
+              if s == "node_modules"
+                Find.prune
+              end
               if s == ".vuepress"
                 # ok
               else

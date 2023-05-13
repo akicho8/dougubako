@@ -87,7 +87,7 @@ module FileIgnore
       /\b(cache|password_dic|coverage|public\/assets)\b/,
       /\b(doc\/app|coverage|pkg|ruby_sess|yardoc|rdoc)\b/,
       /tmp.*meta_request.*json\z/, # rails tmp/data/meta_request/91f33f2a0bbf97d42fc1b1c95915fc91.json
-      %{/public/},
+      # %{/public/},
       /\b(dist|cache|password_dic|coverage|public\/assets)\b/,
       /\.bundle\b/,
       # ゴミ
@@ -117,7 +117,7 @@ module FileIgnore
       /miniprofiler/,
       /\.(band)\b/,                 # Garageband プロジェクトディレクトリ
 
-      %r{/canon_cop/(?:fairy|log|trash|upload_files)/},
+      %r{/legato/(?:lyric|stash|log|trash|upload|yubi)/},
     ]
   end
 end

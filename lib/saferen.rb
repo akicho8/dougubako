@@ -12,7 +12,7 @@ module Saferen
       new(*args, &block).run
     end
 
-    def initialize(source_regexp, dest_text, files, **options)
+    def initialize(source_regexp, dest_text, files, options = {})
       @source_regexp = source_regexp
       @dest_text = dest_text
       @files = files
@@ -37,8 +37,8 @@ module Saferen
       @files.each do |file|
         file = Pathname(file).expand_path
         file.find do |f|
-          if f.to_s.match(/(\.(svn|git)|\b(cvs)|\b(rcs))\b/i)
-            next
+          if f.to_s.match(/\.(?:svn|git)\b|\b(?:node_modules)\b/i)
+            Find.prune
           end
           @targets << f
         end
