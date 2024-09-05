@@ -254,7 +254,7 @@ module Saferep
         opts.on("オプション:")
         opts.on("-x", "--exec", "本当に置換する") {|v| options[:exec] = v }
         opts.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})") {|v| options[:word] = v }
-        opts.on("-s", "-Q", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})") {|v| options[:simple] = v }
+        opts.on("-s", "-F", "--simple", "置換前後の文字列を普通のテキストと見なす。-AB 相当。(#{options[:simple]})") {|v| options[:simple] = v }
         opts.on("-a", "--all", "フィルタせずにすべてのファイルを対象にする(#{options[:all]})") {|v| options[:all] = v }
         opts.on("-A", "置換前の文字列のみ普通のテキストと見なす(#{options[:simple_a]})") {|v| options[:simple_a] = v }
         opts.on("-B", "置換後の文字列のみ普通のテキストと見なす(#{options[:simple_b]})") {|v| options[:simple_b] = v }

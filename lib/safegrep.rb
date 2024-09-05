@@ -178,7 +178,7 @@ module Safegrep
         opts.on("-i", "--ignore-case", "大小文字を区別しない(#{options[:ignocase]})") {|v| options[:ignocase] = v  }
         opts.on("-w", "--word-regexp", "単語とみなす(#{options[:word]})")             {|v| options[:word] = v      }
         opts.on("-f", "--fuzzy", "曖昧検索(#{options[:fuzzy]})")                      {|v| options[:fuzzy] = v     }
-        opts.on("-s", "-Q", "検索文字列をエスケープ(#{options[:escape]})")            {|v| options[:escape] = v    }
+        opts.on("-s", "-F", "検索文字列をエスケープ(#{options[:escape]})")            {|v| options[:escape] = v    }
         opts.on("-a", "コメント行も含める(#{options[:all]})")                         {|v| options[:all] = v       }
         opts.on("-u", "--[no-]utf8", "半角カナを全角カナに統一(#{options[:toutf8]})") {|v| options[:toutf8] = v    }
         opts.on("-d", "--debug", "デバッグモード")                                    {|v| options[:debug] = v     }

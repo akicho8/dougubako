@@ -80,7 +80,7 @@ module FileIgnore
   def filename_regexp_list
     [
       # 拡張子
-      /\.(js\.map|sql|sqlite3|cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|tga|\.del-.*)\z/,
+      /\.(js\.map|sql|sqlite3|cache|schemas|old|bak|orig|rej|a|o|Z|elc|ln|rbc|tga|wasm||\.del-.*)\z/,
       /\.(au|pdf|pptx|fla|flv|avi|otf|ttf|mp3|m4a|ogg|mov|mp4|zip|lzh|mpg|jpg|bmp|wav|xm|mid|gif|tar|gz|png|db|swf|svg|diff|xlsx?|ppt|ico|pid|tmp|sf2)\z/i,
       # 単語
       /\b(BREAKING_CHANGES|RDEFSX|RDEFS|RCSLOG|RCS|SCCS|TAGS|CHANGELOG|\.make\.sate|\.nse_depinfo|CVS|cvslog|svn|git|log|DS_Store)\b/, # /i だと /tags/ が除外されるので

@@ -35,7 +35,7 @@ module Saferm
             next
           end
           if @src_regexp.match(e.basename.to_s)
-            FileUtils.rm_rf(e.expand_path.to_s, {:noop => !@options[:exec], :verbose => true})
+            FileUtils.rm_rf(e.expand_path.to_s, noop: !@options[:exec], verbose: true)
           end
           @count += 1
         end

@@ -62,13 +62,13 @@ module Safefind
           end
           new_path = @options[:copy_to] + target
           unless new_path.dirname.exist?
-            FileUtils.mkdir_p(new_path.dirname, file_utils_options)
+            FileUtils.mkdir_p(new_path.dirname, **file_utils_options)
           end
           unless fname.directory?
-            FileUtils.cp(fname, new_path, file_utils_options)
+            FileUtils.cp(fname, new_path, **file_utils_options)
           end
         when @options[:delete]
-          FileUtils.rm_rf(fname.expand_path.to_s, file_utils_options)
+          FileUtils.rm_rf(fname.expand_path.to_s, **file_utils_options)
         else
           puts fname.expand_path
         end
