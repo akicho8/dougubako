@@ -1,4 +1,4 @@
-#!/usr/local/var/rbenv/versions/3.2.2/bin/ruby
+#!/usr/local/var/rbenv/versions/3.4.2/bin/ruby
 #!/usr/bin/env ruby
 require_relative '../lib/saferen'
 Saferen::CLI.execute(ARGV)

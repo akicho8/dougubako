@@ -42,12 +42,17 @@ module Saferenum
         all = dir.children      # すべてのファイルとサブディレクトリ
         all = reject_files(all)
         all = all.sort
-        files = all.find_all { |e| !e.directory? } # ファイルのみ
-        dirs = all - files              # ディレクトリのみ
+        
+        if @base.options[:directory]
+          files = all.find_all { |e| e.directory? }
+        else
+          files = all.find_all { |e| !e.directory? } # ファイルのみ
+        end
 
         # サブディレクトリを処理
         if @base.options[:recursive]
-          dirs.each{|e|self.class.new(@base, e)}
+          dirs = all.find_all { |e| e.directory? }
+          dirs.each { |e| self.class.new(@base, e) }
         end
 
         unless @base.options[:all]
@@ -150,6 +155,7 @@ module Saferenum
         :step            => 10,     # インデックスのステップ
         :zero            => 1,      # 幅の余白
         :number_only     => false,  # 番号だけにする
+        :directory       => false,  # ディレクトリを対象とする
                                     # CLで指定できないもの
         :noop            => $DEBUG, # デバッグ時は true にする
       }
@@ -169,6 +175,7 @@ module Saferenum
         opts.on("-s", "--step=INTEGER", "インデックスのステップ(デフォルト:#{options[:step]})", Integer) {|v| options[:step] = v }
         opts.on("-z", "--zero=INTEGER", "先頭に入れる0の数(デフォルト:#{options[:zero]})", Integer) {|v| options[:zero] = v }
         opts.on("-n", "--number-only", "ゼロパディングせず番号のみにする(デフォルト:#{options[:number_only]})", TrueClass) {|v| options[:number_only] = v }
+        opts.on("-d", "--directory", "ディレクトリを対象にする(デフォルト:#{options[:directory]})", TrueClass) {|v| options[:directory] = v }
         opts.on("-v", "--verbose", "詳細表示(デフォルト:#{options[:verbose]})") {|v| options[:verbose] = v }
         opts.on("-h", "--help", "このヘルプを表示する"){puts opts; abort}
         opts.on(<<-EOT)
